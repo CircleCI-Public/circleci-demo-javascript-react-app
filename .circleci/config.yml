@@ -13,7 +13,7 @@ app_test_steps: &app_test_steps
         # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
         keys: 
           - v1-repo-{{ .Branch }}-{{ checksum "package-lock.json" }}
-          - v1-repo-{{ .Branch }
+          - v1-repo-{{ .Branch }}
           - v1-repo-
     - run: npm --version
     - run:
