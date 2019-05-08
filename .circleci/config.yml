@@ -1,13 +1,13 @@
 version: 2 # use CircleCI 2.0
 
-install_npm: &install_npm
-  - run:
-      name: update-npm
-      command: 'sudo npm install -g npm@6'
+# install_npm: &install_npm
+#   - run:
+#       name: update-npm
+#       command: 'sudo npm install -g npm@6'
 
 app_test_steps: &app_test_steps
   - steps:
-    - *install_npm  
+    # - *install_npm  
     - checkout # special step to check out source code to working directory
     - restore_cache: # special step to restore the dependency cache
         # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
@@ -16,8 +16,9 @@ app_test_steps: &app_test_steps
           - v1-repo-{{ .Branch }
           - v1-repo-
     - run: npm --version
+    # In short, the main differences between using npm install and npm ci are: ... If a node_modules is already present, it will be automatically removed before npm ci begins its install. It will never write to package.json or any of the package-locks: installs are essentially frozen.
     - run:
-        name: Install NPM
+        name: Install dependencies with NPM
         command: npm ci
     - run:
         name: Check current version of Node
