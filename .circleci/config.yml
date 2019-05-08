@@ -31,7 +31,7 @@ app_test_steps: &app_test_steps
         command: npm test
     - store_artifacts: 
         path: test-results.xml
-        prefix: tests
+        destination: tests2019
     - store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/ 
         path: coverage
         prefix: coverage
