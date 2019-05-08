@@ -16,7 +16,6 @@ app_test_steps: &app_test_steps
           - v1-repo-{{ .Branch }
           - v1-repo-
     - run: npm --version
-    # In short, the main differences between using npm install and npm ci are: ... If a node_modules is already present, it will be automatically removed before npm ci begins its install. It will never write to package.json or any of the package-locks: installs are essentially frozen.
     - run:
         name: Install dependencies with NPM
         command: npm ci
@@ -26,27 +25,27 @@ app_test_steps: &app_test_steps
     - save_cache: # special step to save the dependency cache
         key: v1-repo-{{ .Branch }}-{{ checksum "package-lock.json" }}
         paths:
-          - ~/npm
-    - run: # run tests
+          - "~/npm"
+    - run:
         name: test
         command: npm test
-      - store_artifacts: # special step to save test results as as artifact
-        # Upload test summary for display in Artifacts: https://circleci.com/docs/2.0/artifacts/ 
+    - store_artifacts: 
         path: test-results.xml
         prefix: tests
     - store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/ 
         path: coverage
         prefix: coverage
     - store_test_results: # for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
-        path: test-results.xml
+      path: test-results.xml
     # See https://circleci.com/docs/2.0/deployment-integrations/ for deploy examples
 
 jobs:
   Node 10:
     docker: [{ image: "circleci/node:10"}]
     <<: *app_test_steps
+
 workflows:
-  version: 2:
-    Build and Test:
-      jobs:
-        - Node 10
+  version: 2
+  Build and Test:
+    jobs:
+      - Node 10
