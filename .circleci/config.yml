@@ -25,8 +25,10 @@ jobs:
           command: npm test # replace with `yarn test` if using yarn
 
       - store_artifacts: 
-          path: test-results.xml
-          destination: tests2019
+          path: test-results
+
+      - store_test_results:
+          path: test-results
 
 workflows:
   version: 2
