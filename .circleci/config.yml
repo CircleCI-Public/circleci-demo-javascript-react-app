@@ -1,34 +1,27 @@
 version: 2 # use CircleCI 2.0
 
-# install_npm: &install_npm
-#   - run:
-#       name: update-npm
-#       command: 'sudo npm install -g npm@6'
-
 app_test_steps: &app_test_steps
   - steps:
-    # - *install_npm  
     - checkout # special step to check out source code to working directory
+
     - restore_cache: # special step to restore the dependency cache
         # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
         keys: 
-          - v1-repo-{{ .Branch }}-{{ checksum "package-lock.json" }}
-          - v1-repo-{{ .Branch }}
-          - v1-repo-
-    - run: npm --version
+          - v1-repo-{{ checksum "package-lock.json" }}
+
     - run:
         name: Install dependencies with NPM
-        command: npm ci
-    - run:
-        name: Check current version of Node
-        command: node -v          
+        command: npm install # replace with `yarn install` if using yarn
+
     - save_cache: # special step to save the dependency cache
-        key: v1-repo-{{ .Branch }}-{{ checksum "package-lock.json" }}
+        key: v1-repo-{{ checksum "package-lock.json" }}
         paths:
-          - "~/npm"
+          - "node_modules"
+
     - run:
-        name: test
-        command: npm test
+        name: Run tests
+        command: npm test # replace with `yarn test` if using yarn
+
     - store_artifacts: 
         path: test-results.xml
         destination: tests2019
