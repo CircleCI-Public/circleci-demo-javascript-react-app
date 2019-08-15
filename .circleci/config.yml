@@ -1,6 +1,9 @@
-version: 2 # use CircleCI 2.0
+version: 2.1
+orbs:
+  # https://circleci.com/orbs/registry/orb/circleci/node
+  node: circleci/node@1.1.4
 jobs:
-  build:
+  build-without-orb:
     docker:
       - image: circleci/node:10
     steps:
@@ -9,17 +12,43 @@ jobs:
       - restore_cache: # special step to restore the dependency cache
           # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
           keys: 
-            - v1-repo-{{ checksum "package-lock.json" }}
+            - node-deps-v1-without-orbs-{{ .Branch }}-{{ checksum "package-lock.json" }}
 
       - run:
           name: Install dependencies with NPM
           command: npm install # replace with `yarn install` if using yarn
 
       - save_cache: # special step to save the dependency cache
-          key: v1-repo-{{ checksum "package-lock.json" }}
+          key: node-deps-v1-without-orbs-{{ .Branch }}-{{ checksum "package-lock.json" }}
           paths:
-            - "node_modules"
+            - "~/project/node_modules"
 
+      - run:
+          name: Run tests
+          # Runs jest with "--maxWorkers=2" argument to avoid OOM issues
+          command: npm test # replace with `yarn test` if using yarn
+
+      - store_artifacts:
+          path: test-results
+      
+      - store_test_results:
+          path: test-results
+  build-with-orb:
+    executor:
+      name: node/default
+      tag: "10"
+    steps:
+      - checkout # special step to check out source code to working directory
+
+      - node/with-cache: # special step to restore the dependency cache
+          # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
+          cache-key: package-lock.json
+          cache-version: v1-with-orbs
+          use-strict-cache: true
+          steps:
+            - run:
+                name: Install dependencies with NPM
+                command: npm install # replace with `yarn install` if using yarn
       - run:
           name: Run tests
           # Runs jest with "--maxWorkers=2" argument to avoid OOM issues
@@ -33,6 +62,7 @@ jobs:
 
 workflows:
   version: 2
-  Build and Test:
+  build-and-test:
     jobs:
-      - build
+      - build-with-orb
+      - build-without-orb
