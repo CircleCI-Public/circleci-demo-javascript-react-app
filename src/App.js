@@ -1,37 +1,25 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 
-import Layout from './Componets/Layout';
-import Header from './Componets/Header';
-import Container from './Componets/Container';
-import Card from './Componets/Card';
+import Layout from './Components/Layout';
+import Header from './Components/Header';
+import Container from './Components/Container';
+import Card from './Components/Card';
 
+export const App = () => {
+  const [cards, setCards] = useState([])
 
-class App extends Component {
-  render() {
-    return (
-      <Layout>
-        <Header title="Baby Hippo Gram"/>
-        <Container>
-          <Card cards={ this.state.cards } />
-        </Container>
-      </Layout>
-    );
-  }
+  useEffect( function() {
+   return fetch('https://www.reddit.com/r/babyhippos/hot/.json?count=20')
+      .then(res => setCards(res.json()))
+  }, [])
 
-  state = {
-      cards: []
-  };
-
-  componentDidMount() {
-      fetch('https://www.reddit.com/r/babyhippos/hot/.json?count=20')
-      .then(res => res.json())
-      .then((data) => {
-          console.log(data.data.children);
-          this.setState({ cards: data.data.children })
-      })
-      .catch(console.log)
-  }
+  return (
+    <Layout>
+      <Header title="Baby Hippo Gram"/>
+      <Container>
+        <Card cards={ cards } />
+      </Container>
+    </Layout>
+  );
 }
-
-export default App;
