@@ -1,7 +1,6 @@
 # CircleCI Demo React JS App
 
 [![CircleCI](https://circleci.com/gh/CircleCI-Public/circleci-demo-javascript-react-app.svg?style=svg)](https://circleci.com/gh/CircleCI-Public/circleci-demo-javascript-react-app)
-[![GitHub License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](https://github.com/MIP2000/circleci-demo-javascript-react-app/blob/add-license-1/LICENSE)
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
@@ -71,3 +70,8 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/de
 ### `npm run build` fails to minify
 
 This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+
+## Copyright and license
+
+The MIT License (MIT) [http://www.opensource.org/licenses/mit-license.php](http://www.opensource.org/licenses/mit-license.php)
+
