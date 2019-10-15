@@ -1,7 +1,7 @@
 # CircleCI Demo React JS App
 
 [![CircleCI](https://circleci.com/gh/CircleCI-Public/circleci-demo-javascript-react-app.svg?style=svg)](https://circleci.com/gh/CircleCI-Public/circleci-demo-javascript-react-app)
-[![GitHub License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](https://raw.githubusercontent.com/CircleCI-Public/gcp-gke-orb/master/LICENSE)
+[![GitHub License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](https://github.com/MIP2000/circleci-demo-javascript-react-app/blob/add-license-1/LICENSE)
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
