@@ -8,8 +8,9 @@ This document provides a walkthrough of the .circleci/config.yml file for a Node
 
 This is the CircleCI reference JavaScript Node.js project to show how to build an Node app on CircleCI with version: 2.1 configuration:
 
-[Demo JavaScript Node Project on GitHub](https://github.com/CircleCI-Public/circleci-demo-javascript-react-app/tree/2.1-orb-example)
-[Demo JavaScript Node Project building on CircleCI](https://circleci.com/gh/CircleCI-Public/circleci-demo-javascript-react-app)
+* [Demo JavaScript Node Project on GitHub](https://github.com/CircleCI-Public/circleci-demo-javascript-react-app/tree/2.1-orb-example)
+
+* [Demo JavaScript Node Project building on CircleCI](https://circleci.com/gh/CircleCI-Public/circleci-demo-javascript-react-app)
 
 In the project you will find a CircleCI configuration file .circleci/config.yml. This file shows best practice for using version 2.1 config with Node projects.
 
@@ -53,6 +54,7 @@ workflows:
 
 ## Config Walkthrough
 
+By using the  2.1 Node orb, you’re able to pull in the docker image that you’d like, checkout your  code,  install node,  and then  run  any other  testing  steps that you’re looking for. 
  
 Success! You just set up a Node.js app to build on CircleCI with version: 2.1 configuration. Check out our project’s Job page to see how this looks when building on CircleCI.
 
