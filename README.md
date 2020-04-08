@@ -1,77 +1,59 @@
-# CircleCI Demo React JS App
+https://circleci.com/docs/2.0/language-javascript/
+Notes
+https://github.com/CircleCI-Public/node-orb/pull/24
+ 
 
-[![CircleCI](https://circleci.com/gh/CircleCI-Public/circleci-demo-javascript-react-app.svg?style=svg)](https://circleci.com/gh/CircleCI-Public/circleci-demo-javascript-react-app)
+# Node.js - JavaScript Tutorial
+This document provides a walkthrough of the .circleci/config.yml file for a Node.js sample application.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is the CircleCI reference JavaScript Node.js project to show how to build an Node app on CircleCI with version: 2.1 configuration:
 
-## Available Scripts
+[Demo JavaScript Node Project on GitHub](https://github.com/CircleCI-Public/circleci-demo-javascript-react-app/tree/2.1-orb-example)
+[Demo JavaScript Node Project building on CircleCI](https://circleci.com/gh/CircleCI-Public/circleci-demo-javascript-react-app)
 
-In the project directory, you can run:
+In the project you will find a CircleCI configuration file .circleci/config.yml. This file shows best practice for using version 2.1 config with Node projects.
 
-### `npm start`
+Pre-Built CircleCI Docker Images
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+We recommend using a CircleCI pre-built image that comes pre-installed with tools that are useful in a CI environment. You can select the Node version you need from Docker Hub: https://hub.docker.com/r/circleci/node/. The demo project uses an official CircleCI image.
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+Database images for use as a secondary ‘service’ container are also available.
 
-### `npm test`
+## Build the Demo JavaScript Node Project Yourself
+A good way to start using CircleCI is to build a project yourself. Here’s how to build the demo project with your own account:
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Fork the project on GitHub to your own account.
+Go to the Add Projects page in the CircleCI application and click the Set Up Project button next to the project you just forked.
 
-### `npm run build`
+To make changes you can edit the .circleci/config.yml file and make a commit. When you push a commit to GitHub, CircleCI will build and test the project.
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Sample Configuration
+Below is the .circleci/config.yml file in the demo project.
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+```
+jobs:
+  install-node-example:
+    docker:
+      - image: 'cimg/base:stable'
+    steps:
+      - checkout
+      - node/install:
+          install-yarn: true
+          node-version: latest
+      - run: node --version
+orbs:
+  node: circleci/node@13.7.0
+version: 2.1
+workflows:
+  test_my_app:
+    jobs:
+      - install-node-example
+```
+ 
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Config Walkthrough
 
-### `npm run eject`
+ 
+Success! You just set up a Node.js app to build on CircleCI with version: 2.1 configuration. Check out our project’s Job page to see how this looks when building on CircleCI.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
-
-## Copyright and license
-
-The MIT License (MIT) [http://www.opensource.org/licenses/mit-license.php](http://www.opensource.org/licenses/mit-license.php)
 
