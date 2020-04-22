@@ -1,23 +1,9 @@
-jobs:
-  install-node:
-    docker:
-      - image: 'cimg/base:stable'
-    steps:
-      - checkout
-      - node/install:
-          install-yarn: true
-          node-version: latest
-      - run: node --version
-
 orbs:
   node: circleci/node@2.0.2
 
 version: 2.1
 
 workflows:
-  test-jobs:
-    jobs:
-      - install-node
   matrix-tests:
     jobs:
       - node/test:
