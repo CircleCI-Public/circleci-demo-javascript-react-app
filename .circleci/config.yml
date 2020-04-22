@@ -16,10 +16,7 @@
 #     jobs:
 #       - install-node-example
 
-version 2.1
 
-orbs:
-  node: circleci/node@2.0.2
 
 jobs:
   install-node:
@@ -32,7 +29,12 @@ jobs:
           node-version: latest
       - run: node --version
 
-  workflows:
-  test:
+orbs:
+  node: circleci/node@2.0.2
+
+version: 2.1
+
+workflows:
+  test-jobs:
     jobs:
-      - install-node-example
+      - install-node
