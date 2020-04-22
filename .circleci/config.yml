@@ -11,6 +11,7 @@ jobs:
 
 orbs:
   node: circleci/node@2.0.2
+  heroku: circleci/heroku@1.0.1
 
 version: 2.1
 
@@ -26,12 +27,8 @@ workflows:
           version: 12.16.0
       - node/test:
           version: 10.19.0
-  deploy-heroku:
-    jobs:
       - heroku/deploy-via-git:
-      filters:
-        branches:
-          only:
-            - master
-      requires:
-        - matrix-tests
+        filters:
+          branches:
+            only:
+              - master
