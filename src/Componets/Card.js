@@ -4,11 +4,11 @@ const Cards = ({ cards }) => {
     console.log({cards})
 
     return (
-        <div class="row">
+        <div className="row">
        {cards.map((card) => (
             <span>
                 { card.data.crosspost_parent == null && card.data.media == null ? 
-                <div class="card mb-4">
+                <div className="card mb-4">
                     <img src={ card.data.url } alt="" width="400px" height="300px"/>
                 </div>
                 : ""
