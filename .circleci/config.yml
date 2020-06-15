@@ -4,11 +4,6 @@ orbs:
 version: 2.1
 
 workflows:
-  matrix-tests:
+  node-tests:
     jobs:
-      - node/test:
-          version: 13.11.0
-      - node/test:
-          version: 12.16.0
-      - node/test:
-          version: 10.19.0
+      - node/test
