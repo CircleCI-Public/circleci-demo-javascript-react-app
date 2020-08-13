@@ -20,7 +20,7 @@ orbs:
 version: 2.1
 
 workflows:
-  matrix-tests:
+  app-tests:
     jobs:
       - node/test
 ```
