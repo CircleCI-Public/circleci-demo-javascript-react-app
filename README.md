@@ -15,19 +15,14 @@ Below is the .circleci/config.yml file in the demo project.
 
 ```
 orbs:
-  node: circleci/node@2.0.2
+  node: circleci/node4.0.0
 
 version: 2.1
 
 workflows:
   matrix-tests:
     jobs:
-      - node/test:
-          version: 13.11.0
-      - node/test:
-          version: 12.16.0
-      - node/test:
-          version: 10.19.0
+      - node/test
 ```
 
 # Config Walkthrough
