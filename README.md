@@ -1,6 +1,10 @@
 # Quickstart: Demo JavaScript Node.js Reference Project
 We maintain a reference JavaScript Node.js project to show how to build an Express.js app on CircleCI with version: 2.1 configuration:
+
 [Demo JavaScript Node Project on GitHub](https://github.com/CircleCI-Public/circleci-demo-javascript-react-app)
+
+
+[![CircleCI](https://circleci.com/gh/CircleCI-Public/circleci-demo-javascript-react-app.svg?style=svg)](https://circleci.com/gh/CircleCI-Public/circleci-demo-javascript-react-app/)
 [Demo JavaScript Node Project building on CircleCI](https://app.circleci.com/pipelines/github/CircleCI-Public/circleci-demo-javascript-react-app)
 
 In the project you will find a CircleCI configuration file .circleci/config.yml. This file shows best practice for using version 2.1 config with Node projects.
