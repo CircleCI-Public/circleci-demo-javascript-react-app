@@ -1,0 +1,15 @@
+version: 2.1
+
+workflows:
+  test-deploy:
+    jobs:
+      - test
+     
+
+jobs:
+  test:
+    docker:
+      - image: cimg/node:15.3.0
+    steps:
+      - checkout
+      - run: node --version
