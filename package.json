@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
-    "react-scripts": "3.0.0"
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-scripts": "^3.4.3"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -29,7 +29,7 @@
     ]
   },
   "devDependencies": {
-    "jest-junit": "^6.4.0"
+    "jest-junit": "^10.0.0"
   },
   "jest-junit": {
     "suiteName": "jest tests",
