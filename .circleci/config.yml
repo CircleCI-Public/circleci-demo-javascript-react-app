@@ -7,3 +7,4 @@ workflows:
   regex-tests:
     jobs:
       - node/test
+      - node/test
