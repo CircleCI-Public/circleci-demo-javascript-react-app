@@ -9,6 +9,9 @@
 /coverage
 /test-results
 
+# IDEA IDEs
+.idea
+
 # production
 /build
 
