@@ -34,5 +34,4 @@ Matrix jobs are a simple way to test your Node app on various node environments.
 
 Success! You just set up a Node.js app to build on CircleCI with version: 2.1 configuration. Check out our project’s Job page to see how this looks when building on CircleCI.
 
-Test
 
