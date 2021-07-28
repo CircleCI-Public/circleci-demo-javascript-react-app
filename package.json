@@ -29,7 +29,8 @@
     ]
   },
   "devDependencies": {
-    "jest-junit": "^10.0.0"
+    "jest-junit": "^10.0.0",
+    "react-test-renderer": "^17.0.1"
   },
   "jest-junit": {
     "suiteName": "jest tests",
