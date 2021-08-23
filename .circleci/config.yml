@@ -1,5 +1,6 @@
 orbs:
   node: circleci/node@4.2.1
+  gcp-cli: circleci/gcp-cli@2.2.0 
 
 version: 2.1
 
@@ -14,6 +15,12 @@ jobs:
         - run: docker volume ls
         - run: docker run --mount source=datastore,destination=/mnt/volume debian:bullseye-slim dd if=/dev/zero of=/mnt/volume/zero bs=32M count=32
         - run: docker volume ls
+        - run: gcp-cli/install
+        - run:
+            name: test gcloud
+            command: |
+              gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
+
 
 workflows:
   app-tests:
