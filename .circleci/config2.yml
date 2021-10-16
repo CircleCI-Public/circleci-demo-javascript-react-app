@@ -1,0 +1,13 @@
+version: 2.1
+workflows:
+  test-deploy:
+    jobs:
+      -testibrahim:
+
+jobs:
+  test:
+    docker:
+      - image: cimg/node:16.11.1
+    steps:
+      - checkout
+      - run: node --version
