@@ -14,6 +14,7 @@ jobs:
         - run: docker volume ls
         - run: docker run --mount source=datastore,destination=/mnt/volume debian:bullseye-slim dd if=/dev/zero of=/mnt/volume/zero bs=32M count=32
         - run: docker volume ls
+        - run: docker ps 
 
 workflows:
   app-tests:
