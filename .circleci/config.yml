@@ -20,3 +20,4 @@ workflows:
   app-tests:
     jobs:
       - build
+      - deploy 
