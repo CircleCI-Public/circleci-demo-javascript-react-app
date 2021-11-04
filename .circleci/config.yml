@@ -15,9 +15,20 @@ jobs:
         - run: docker run --mount source=datastore,destination=/mnt/volume debian:bullseye-slim dd if=/dev/zero of=/mnt/volume/zero bs=32M count=32
         - run: docker volume ls
         - run: docker ps 
-
+   build1:
+      docker:
+        - image: docker
+      steps:
+        - setup_remote_docker:
+            docker_layer_caching: true
+        - run: docker image ls
+        - run: docker volume ls
+        - run: docker run helloworld:latest
+        - run: docker ps
+        - run: docker rm -fv $(docker ps -aq)
+        - run: docker ps   
 workflows:
   app-tests:
     jobs:
       - build
-      - deploy 
+      - build1 
