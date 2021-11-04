@@ -15,6 +15,13 @@ jobs:
         - run: docker run --mount source=datastore,destination=/mnt/volume debian:bullseye-slim dd if=/dev/zero of=/mnt/volume/zero bs=32M count=32
         - run: docker volume ls
         - run: docker ps 
+        - run: echo "FROM centos:7 
+                    RUN yum -y update
+                    RUN yum -y install  httpd
+                    RUN yum -y install php
+                    RUN echo 'Hello from ZERO' > /var/www/html/index.html
+                    CMD ['/usr/sbin/httpd','DFOREGROUND']
+                    EXPOSE 80" > Dockerfile
    build1:
       docker:
         - image: docker
