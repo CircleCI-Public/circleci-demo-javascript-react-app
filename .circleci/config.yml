@@ -10,11 +10,12 @@ jobs:
       steps:
         - setup_remote_docker:
             docker_layer_caching: true
-        - run: docker image ls
-        - run: docker volume ls
-        - run: docker run --mount source=datastore,destination=/mnt/volume debian:bullseye-slim dd if=/dev/zero of=/mnt/volume/zero bs=32M count=32
-        - run: docker volume ls
-        - run: docker ps 
+        - run: yum -y update
+        - run: yum -y install  httpd
+        - run: yum -y install php
+        - run: echo 'Hello from ZERO' > /var/www/html/index.html
+        - cmd: ['/usr/sbin/httpd','DFOREGROUND'] 
+        - expose: 80
         
    build1:
       docker:
