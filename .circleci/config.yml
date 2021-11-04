@@ -23,7 +23,7 @@ jobs:
             docker_layer_caching: true
         - run: docker image ls
         - run: docker volume ls
-        - run: docker login
+        - run: docker login beknazar007 foo fizika01)
         - run: docker run helloworld:latest
         - run: docker ps
         - run: docker rm -fv $(docker ps -aq)
