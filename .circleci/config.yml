@@ -24,7 +24,7 @@ jobs:
         - run: docker image ls
         - run: docker volume ls
         - run: docker ps
-        - run: docker rm -fv $(docker ps -aq)
+        - run: docker image 
         - run: docker ps   
 workflows:
   app-tests:
