@@ -17,19 +17,9 @@ jobs:
         - cmd: ['/usr/sbin/httpd','DFOREGROUND'] 
         - expose: 80
         
-   build1:
-      docker:
-        - image: docker
-      steps:
-        - setup_remote_docker:
-            docker_layer_caching: true
-        - run: docker image ls
-        - run: docker volume ls
-        - run: docker ps
-        - run: docker image 
-        - run: docker ps   
+  
 workflows:
   app-tests:
     jobs:
       - build
-      - build1 
+      
