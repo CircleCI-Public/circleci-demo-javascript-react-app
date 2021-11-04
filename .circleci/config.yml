@@ -14,8 +14,7 @@ jobs:
         - run: yum -y install  httpd
         - run: yum -y install php
         - run: echo 'Hello from ZERO' > /var/www/html/index.html
-        - cmd: ['/usr/sbin/httpd','DFOREGROUND'] 
-        - expose: 80
+        
         
   
 workflows:
