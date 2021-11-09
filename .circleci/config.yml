@@ -25,7 +25,7 @@ jobs:
             # the build identifier, which includes the short git sha
             BUILD_NUMBER="CIRC${BUILD_COUNTER}-${GIT_SHA}"
             echo "export EXTENSION_BUILD_NUMBER=${BUILD_NUMBER}" >> "${BASH_ENV}"
-
+ 
             # output build id and counter
             echo -e "\nbuild counter: ${BUILD_COUNTER}; build id: ${BUILD_NUMBER}\n"
             curl -X POST -H "Circle-Token: $CIRCLE_TOKEN" -H "Content-Type: application/json" -d '{"name":"extension_build","value":"${BUILD_COUNTER}"}' https://circleci.com/api/v2/project/github/jkzilla/circleci-demo-javascript-react-app/envvar \
