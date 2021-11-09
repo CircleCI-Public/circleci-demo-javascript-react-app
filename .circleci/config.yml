@@ -1,21 +1,44 @@
 orbs:
-  node: circleci/node@4.2.1
+  circle-node: circleci/node@4.7.0
+
+default-executor: &default-executor
+    executor:
+      name: 'circle-node/default'
 
 version: 2.1
 
 jobs:
-   build:
-      docker:
-        - image: docker
-      steps:
-        - setup_remote_docker:
-            docker_layer_caching: true
-        - run: docker image ls
-        - run: docker volume ls
-        - run: docker run --mount source=datastore,destination=/mnt/volume debian:bullseye-slim dd if=/dev/zero of=/mnt/volume/zero bs=32M count=32
-        - run: docker volume ls
+  test-script:
+    <<: *default-executor
+    steps:
+      - checkout
+      - run: 
+          name: Create unique build identifier
+          command: |
+            GIT_SHA=$( git rev-parse --short HEAD )
+            echo "export GIT_SHA=${GIT_SHA}" >> "${BASH_ENV}"
+
+            # the always-increasing counter, based on CIRCLE_BUILD_NUM
+            BUILD_COUNTER="${CIRCLE_BUILD_NUM}"
+            echo "export EXTENSION_BUILD_COUNTER=${BUILD_COUNTER}" >> "${BASH_ENV}"
+
+            # the build identifier, which includes the short git sha
+            BUILD_NUMBER="CIRC${BUILD_COUNTER}-${GIT_SHA}"
+            echo "export EXTENSION_BUILD_NUMBER=${BUILD_NUMBER}" >> "${BASH_ENV}"
+
+            # output build id and counter
+            echo -e "\nbuild counter: ${BUILD_COUNTER}; build id: ${BUILD_NUMBER}\n"
+            curl -X POST -H "Circle-Token: $CIRCLE_TOKEN" -H "Content-Type: application/json" -d '{"name":"extension_build","value":"${BUILD_COUNTER}"}' https://circleci.com/api/v2/project/github/jkzilla/circleci-demo-javascript-react-app/envvar \
+
+      - run: 
+          name: List Env Vars
+          command: |
+            curl -H "Circle-Token: $CIRCLE_TOKEN" https://circleci.com/api/v2/project/github/jkzilla/circleci-demo-javascript-react-app/envvar
+
 
 workflows:
-  app-tests:
+  test-script:
     jobs:
-      - build
+      - test-script:
+          context: CIRCLE_TOKEN
+           
