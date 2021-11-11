@@ -6,20 +6,17 @@ jobs: # basic units of work in a run
       # CircleCI node images available at: https://hub.docker.com/r/circleci/node/
       - image: circleci/node:14.17-browsers
         auth:
-          username: beknazar
-          password: Zml6aWthMDEpCg==  # context / project UI env-var reference
-    steps: # steps that comprise the `build` job
-      - checkout # check out source code to working directory
-      # Run a step to setup an environment variable
-      # Redirect MY_ENV_VAR into $BASH_ENV
+          username: $DOCKER_HUB_NAME
+          password: $DOCKER_HUB_PASSWORD 
+    steps: 
+      - checkout 
       - run:
           name: "Setup custom environment variables"
           command: echo 'export MY_ENV_VAR="FOO"' >> $BASH_ENV
       - run: # print the name of the branch we're on
           name: "What branch am I on?"
           command: echo ${CIRCLE_BRANCH}
-      # Run another step, the same as above; note that you can
-      # invoke environment variable without curly braces.
+      
       - run:
           name: "What branch am I on now?"
           command: echo $CIRCLE_BRANCH
@@ -33,8 +30,8 @@ jobs: # basic units of work in a run
           name: "Print an env var stored in a Context"
           command: echo ${CONTEXT_ENV_VAR}
 
-workflows: # a single workflow with a single job called build
+workflows:
   build:
     jobs:
       - build:
-          context: Testing-Env-Vars
+          context: docker-cred
