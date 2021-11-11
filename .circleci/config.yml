@@ -33,5 +33,5 @@ jobs: # basic units of work in a run
 workflows:
   build:
     jobs:
-      - build:
-          context: docker-cred
+      - build
+          
