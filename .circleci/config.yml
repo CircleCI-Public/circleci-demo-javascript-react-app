@@ -19,7 +19,7 @@ workflows:
     imaworkflow:
       triggers:
         - schedule:
-            cron: "0 0 * * *"       
+            cron: "* * * * *"       
             filters:
               branches:
                 only:
