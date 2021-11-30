@@ -1,21 +1,29 @@
-orbs:
-  node: circleci/node@4.2.1
-
 version: 2.1
 
+orbs:
+  slack: circleci/slack@4.5.0
+
 jobs:
-   build:
-      docker:
-        - image: docker
-      steps:
-        - setup_remote_docker:
-            docker_layer_caching: true
-        - run: docker image ls
-        - run: docker volume ls
-        - run: docker run --mount source=datastore,destination=/mnt/volume debian:bullseye-slim dd if=/dev/zero of=/mnt/volume/zero bs=32M count=32
-        - run: docker volume ls
+  imajob:
+    docker:
+      - image: cimg/node:17.1.0  
+    steps:
+      - checkout
+      - run:
+          name: echo hi
+          command: echo "hi"
+      - slack/notify
 
 workflows:
-  app-tests:
-    jobs:
-      - build
+    version: 2
+    imaworkflow:
+      triggers:
+        - schedule:
+            cron: "0 0 * * *"       
+            filters:
+              branches:
+                only:
+                  - main        
+      jobs:
+        - imajob
+    
