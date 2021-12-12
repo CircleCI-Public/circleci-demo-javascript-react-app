@@ -3,27 +3,32 @@ version: 2.1
 orbs:
   slack: circleci/slack@4.5.0
 
+executors:
+  cypress:
+    docker:
+      - image: cypress/base:14
+    working_directory: /mnt/ramdisk
+    resource_class: medium
+
+  ci-node:
+    docker:
+       - image: cimg/node:14.18.2
+    resource_class: medium
+    working_directory: /mnt/ramdisk 
+
 jobs:
   imajob:
-    docker:
-      - image: cimg/node:17.1.0  
+    executor: ci-node
+    working_directory: /mnt/ramdisk
     steps:
       - checkout
       - run:
           name: echo hi
           command: echo "hi"
-      - slack/notify
 
 workflows:
     version: 2
-    imaworkflow:
-      triggers:
-        - schedule:
-            cron: "0 0 0 0 0"       
-            filters:
-              branches:
-                only:
-                  - master        
+    imaworkflow:      
       jobs:
         - imajob
     
