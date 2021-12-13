@@ -39,8 +39,8 @@ jobs:
             # installing to guarantee a clean slate.
             - ~/.npm     
       - run:
-          name: echo bye
-          command: echo "bye"
+          name: echo hi
+          command: echo "hi"
 
 workflows:
     version: 2
