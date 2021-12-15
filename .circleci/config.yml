@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   setup:
     machine: true
-    resource_class: alkemics/pillar
+    resource_class: jkg-runner/jkg-resource-class
     steps:
       - checkout
 
