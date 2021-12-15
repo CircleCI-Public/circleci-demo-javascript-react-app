@@ -15,6 +15,10 @@ executors:
        - image: cimg/node:14.18.2
     resource_class: medium
     working_directory: /mnt/ramdisk 
+    
+  runner-executor:
+    machine: true
+    resource_class: jkg-runner/jkg-resource-class
 
 jobs:
   imajob:
