@@ -1,70 +1,14 @@
 version: 2.1
 
-orbs:
-  slack: circleci/slack@4.5.0
-
-executors:
-  cypress:
-    docker:
-      - image: cypress/base:14
-    working_directory: /mnt/ramdisk
-    resource_class: medium
-
-  ci-node:
-    docker:
-       - image: cimg/node:14.18.2
-    resource_class: medium
-    working_directory: /mnt/ramdisk 
-
-  runner-executor:
-    machine: true
-    resource_class: jkg-runner/jkg-resource-class2 
-
 jobs:
-  imajob:
-    executor: runner-executor
-    working_directory: /mnt/ramdisk
+  setup:
+    machine: true
+    resource_class: alkemics/pillar
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            # When lock file changes, use increasingly general patterns to
-            # restore cache
-            - npm-v3-{{ .Branch }}-{{ checksum "package-lock.json" }}
-            - npm-v3-{{ .Branch }}-
-            - npm-v3-
-      - run: npm --version
-      - run: npm ci
-      - save_cache:
-          key: npm-v3-{{ .Branch }}-{{ checksum "package-lock.json" }}
-          paths:
-            # This should cache the npm cache instead of node_modules, which is
-            # needed because npm ci actually removes node_modules before
-            # installing to guarantee a clean slate.
-            - ~/.npm     
-  rmt_docker_test: 
-      executor: ci-node
-      steps:
-        - checkout
-        - restore_cache:
-            keys:
-              # When lock file changes, use increasingly general patterns to
-              # restore cache
-              - npm-v3-{{ .Branch }}-{{ checksum "package-lock.json" }}
-              - npm-v3-{{ .Branch }}-
-              - npm-v3-      
-        - setup_remote_docker:
-            version: 20.10.2
-            docker_layer_caching: true
-        - run:
-            name: Build Docker image
-            command: |
-              docker build -t test_image .
 
 workflows:
-    version: 2
-    imaworkflow:      
-      jobs:
-        - imajob
-        # - rmt_docker_test
-    
+  version: 2
+  pull-request:
+    jobs:
+      - setup
