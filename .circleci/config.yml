@@ -22,7 +22,7 @@ jobs:
     docker:
       - image: cimg/node:14.13.0
     steps:
-      = checkout
+      - checkout
       - run:
           name: Install libs
           command: npm install
