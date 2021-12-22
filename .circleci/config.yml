@@ -6,10 +6,10 @@ workflows:
     jobs:
       - test
       - test_dev:
-        filter:
-          branches:
-            only:
-              -dev
+          filter:
+            branches:
+              only:
+                -dev
 
 jobs:
   test:
