@@ -26,6 +26,9 @@ jobs:
       - run:
           name: Install libs
           command: npm install
-          command: npm run build  
+      - run: 
+          name: Build project
+          command: npm run build
+
 
 
