@@ -1,29 +1,15 @@
 version: 2.1
 
-orbs:
-  slack: circleci/slack@4.5.0
+workflows: 
+  test-deploy:
+    jobs:
+      - test
 
 jobs:
-  imajob:
+  test:
     docker:
-      - image: cimg/node:17.1.0  
+      - image: cimg/node:14.13.0
     steps:
       - checkout
-      - run:
-          name: echo hi
-          command: echo "hi"
-      - slack/notify
+      - run: node --version
 
-workflows:
-    version: 2
-    imaworkflow:
-      triggers:
-        - schedule:
-            cron: "0 0 * * *"       
-            filters:
-              branches:
-                only:
-                  - main        
-      jobs:
-        - imajob
-    
