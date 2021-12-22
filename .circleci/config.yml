@@ -9,7 +9,7 @@ workflows:
           filter:
             branches:
               only:
-                -dev
+                -rayondev
 
 jobs:
   test:
@@ -23,8 +23,9 @@ jobs:
       - image: cimg/node:14.13.0
     steps:
       = checkout
-      - run: npm install
-      - run: npm run build
+      - run:
+          name: Install libs
+          command: npm install
   
 
 
