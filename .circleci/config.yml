@@ -1,9 +1,15 @@
 version: 2.1
 
-workflows: 
+workflows:
+  version: 2
   test-deploy:
     jobs:
       - test
+      - test_dev:
+        filter:
+          branches:
+            only:
+              -dev
 
 jobs:
   test:
@@ -12,4 +18,13 @@ jobs:
     steps:
       - checkout
       - run: node --version
+  test_dev:
+    docker:
+      - image: cimg/node:14.13.0
+    steps:
+      = checkout
+      - run: npm install
+      - run: npm run build
+  
+
 
