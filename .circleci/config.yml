@@ -29,8 +29,7 @@ jobs:
           command: npm install
       - run:
           name: Build extension
-          command: npm run build
-        
+          command: npm run build      
   test_dev:
     docker:
       - image: cimg/node:14.13.0
