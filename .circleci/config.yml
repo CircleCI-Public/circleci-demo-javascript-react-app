@@ -4,7 +4,7 @@ workflows:
   version: 2
   test-deploy:
     jobs:
-      - test:
+      - dev_build:
           filters:
             branches:
               ignore:
@@ -16,7 +16,7 @@ workflows:
                 - master
 
 jobs:
-  test:
+  dev_build:
     docker:
       - image: cimg/node:14.13.0
     steps:
