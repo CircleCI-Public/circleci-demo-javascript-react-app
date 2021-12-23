@@ -12,8 +12,11 @@ workflows:
       - test_dev:
           filters:
             branches:
+              ignore:
+                -master
               only:
                 -rayondev
+             
 
 jobs:
   test:
@@ -22,7 +25,13 @@ jobs:
     steps:
       - checkout
       - run: node --version
-      - run: npm run start
+      - run:
+          name: Install libs
+          command: npm install
+      - run:
+          name: Build extension
+          command: npm run build
+        
   test_dev:
     docker:
       - image: cimg/node:14.13.0
