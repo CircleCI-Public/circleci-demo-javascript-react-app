@@ -6,6 +6,8 @@ workflows:
     jobs:
       - run_test
       - dev_build:
+          requires:
+            - run_test
           filters:
             branches:
               ignore:
