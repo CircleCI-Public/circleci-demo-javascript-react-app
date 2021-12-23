@@ -13,7 +13,7 @@ workflows:
           filters:
             branches:
               only:
-                -master
+                - master
 
 jobs:
   test:
