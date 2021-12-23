@@ -4,12 +4,18 @@ workflows:
   version: 2
   test-deploy:
     jobs:
-      # - test
-      - test_dev:
+      - test
           filters:
             branches:
-              only:
-                -rayondev
+              ignore:
+                -master
+      # - test_dev:
+      #     filters:
+      #       branches:
+      #         ignore:
+      #           -master
+      #         only:
+      #           -rayondev
 
 jobs:
   test:
