@@ -9,13 +9,11 @@ workflows:
             branches:
               ignore:
                 - master
-      # - test_dev:
-      #     filters:
-      #       branches:
-      #         ignore:
-      #           -master
-      #         only:
-      #           -rayondev
+      - pro_build:
+          filters:
+            branches:
+              only:
+                -master
 
 jobs:
   test:
@@ -30,7 +28,7 @@ jobs:
       - run:
           name: Build extension
           command: npm run build      
-  test_dev:
+  pro_build:
     docker:
       - image: cimg/node:14.13.0
     steps:
