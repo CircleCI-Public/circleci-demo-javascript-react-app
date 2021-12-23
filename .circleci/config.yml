@@ -13,6 +13,8 @@ workflows:
               ignore:
                 - master
       - pro_build:
+          requires:
+            - run_test
           filters:
             branches:
               only:
