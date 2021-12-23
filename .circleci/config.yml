@@ -5,11 +5,11 @@ workflows:
   test-deploy:
     jobs:
       - test
-      - test_dev:
-          filters:
-            branches:
-              only:
-                -rayondev
+      # - test_dev:
+      #     filters:
+      #       branches:
+      #         only:
+      #           -rayondev
 
 jobs:
   test:
