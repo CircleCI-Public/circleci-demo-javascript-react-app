@@ -8,6 +8,8 @@ workflows:
       - test_dev:
           filters:
             branches:
+              ignore:
+                -master
               only:
                 -rayondev
 
