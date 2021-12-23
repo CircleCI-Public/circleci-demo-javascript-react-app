@@ -4,6 +4,7 @@ workflows:
   version: 2
   test-deploy:
     jobs:
+      - run_test
       - dev_build:
           filters:
             branches:
@@ -16,6 +17,18 @@ workflows:
                 - master
 
 jobs:
+  run_test:
+    docker:
+      - image: cimg/node:14.13.0
+    steps:
+      - checkout
+      - run:
+          name: Instal libs
+          command: npm install
+      - run:
+          name: Run test
+          command: npm run test
+
   dev_build:
     docker:
       - image: cimg/node:14.13.0
