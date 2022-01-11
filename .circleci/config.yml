@@ -27,16 +27,16 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/project
-      # Follow instructions here to authenticate git for Heroku: https://devcenter.heroku.com/articles/git#http-git-authentication
-      # The following code may be uncommented, onnce HEROKU_API_KEY & HEROKU_APP_NAME environemnt variables are present
-      # Read more: https://circleci.com/docs/2.0/env-vars/
-      # - heroku/deploy-via-git: 
-      #     force: true # force push when pushing to the heroku remote, see: https://devcenter.heroku.com/articles/git
+      - heroku/deploy-via-git: 
+          force: true # force push when pushing to the heroku remote, see: https://devcenter.heroku.com/articles/git
 
 workflows:
   on_commit:
     jobs:
       - build_and_test
+      # Follow instructions here to authenticate git for Heroku: https://devcenter.heroku.com/articles/git#http-git-authentication
+      # The following code may be uncommented, onnce HEROKU_API_KEY & HEROKU_APP_NAME environemnt variables are present
+      # Read more: https://circleci.com/docs/2.0/env-vars/
       # - deploy:
       #     requires:
       #       - build_and_test # only deploy if the build_and_test job has completed
@@ -54,6 +54,9 @@ workflows:
                 - docs-node-js-language-guide
     jobs:
       - build_and_test
+      # Follow instructions here to authenticate git for Heroku: https://devcenter.heroku.com/articles/git#http-git-authentication
+      # The following code may be uncommented, onnce HEROKU_API_KEY & HEROKU_APP_NAME environemnt variables are present
+      # Read more: https://circleci.com/docs/2.0/env-vars/
       # - deploy:
       #     requires:
       #       - build_and_test # only deploy if the build_and_test job has completed
