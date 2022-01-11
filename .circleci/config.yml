@@ -1,38 +1,59 @@
-version: 2 # use CircleCI 2.0
+version: 2.1
+orbs:
+  node: circleci/node@4.7.0
+  heroku: circleci/heroku@1.2.6
+
 jobs:
-  build:
+  build_and_test:
     docker:
-      - image: circleci/node:10
+      - image: cimg/node:17.2.0
     steps:
-      - checkout # special step to check out source code to working directory
-
-      - restore_cache: # special step to restore the dependency cache
-          # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
-          keys: 
-            - v1-repo-{{ checksum "package-lock.json" }}
-
+      - checkout
+      - node/install-packages:
+          pkg-manager: yarn
       - run:
-          name: Install dependencies with NPM
-          command: npm install # replace with `yarn install` if using yarn
-
-      - save_cache: # special step to save the dependency cache
-          key: v1-repo-{{ checksum "package-lock.json" }}
-          paths:
-            - "node_modules"
-
-      - run:
+          command: yarn test
           name: Run tests
-          # Runs jest with "--maxWorkers=2" argument to avoid OOM issues
-          command: npm test # replace with `yarn test` if using yarn
-
-      - store_artifacts: 
-          path: test-results
-
-      - store_test_results:
-          path: test-results
+      - run:
+          command: yarn build
+          name: Build app
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - .
+  deploy: # this can be any name you choose
+    docker:
+      - image: cimg/node:17.2.0
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - heroku/deploy-via-git:
+          force: true # force push when pushing to the heroku remote, see: https://devcenter.heroku.com/articles/git
 
 workflows:
-  version: 2
-  Build and Test:
+  on_commit:
     jobs:
-      - build
+      - build_and_test
+      - deploy:
+          requires:
+            - build_and_test # only deploy if the build_and_test job has completed
+          filters:
+            branches:
+              only: master # only deploy when on main/master
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"       
+          filters:
+            branches:
+              only:
+                - master
+                - docs-node-js-language-guide
+    jobs:
+      - build_and_test
+      - deploy:
+          requires:
+            - build_and_test # only deploy if the build_and_test job has completed
+          filters:
+            branches:
+              only: master # only deploy when on main/master

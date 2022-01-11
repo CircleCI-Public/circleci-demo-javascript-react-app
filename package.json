@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "export NODE_OPTIONS=--openssl-legacy-provider; react-scripts build",
     "test": "react-scripts test --maxWorkers=2 --ci --coverage --reporters=default --reporters=jest-junit",
     "eject": "react-scripts eject"
   },

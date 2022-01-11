@@ -14,15 +14,65 @@ To make changes you can edit the .circleci/config.yml file and make a commit. Wh
 Below is the .circleci/config.yml file in the demo project.
 
 ```
-orbs:
-  node: circleci/node4.0.0
-
 version: 2.1
+orbs:
+  node: circleci/node@4.7.0
+  heroku: circleci/heroku@1.2.6
+
+jobs:
+  build_and_test:
+    docker:
+      - image: cimg/node:17.2.0
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: yarn
+      - run:
+          command: yarn test
+          name: Run tests
+      - run:
+          command: yarn build
+          name: Build app
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - .
+  deploy: # this can be any name you choose
+    docker:
+      - image: cimg/node:17.2.0
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - heroku/deploy-via-git:
+          force: true # force push when pushing to the heroku remote, see: https://devcenter.heroku.com/articles/git
 
 workflows:
-  app-tests:
+  on_commit:
     jobs:
-      - node/test
+      - build_and_test
+      - deploy:
+          requires:
+            - build_and_test # only deploy if the build_and_test job has completed
+          filters:
+            branches:
+              only: master # only deploy when on main/master
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"       
+          filters:
+            branches:
+              only:
+                - master
+                - docs-node-js-language-guide
+    jobs:
+      - build_and_test
+      - deploy:
+          requires:
+            - build_and_test # only deploy if the build_and_test job has completed
+          filters:
+            branches:
+              only: master # only deploy when on main/master
 ```
 
 # Config Walkthrough
