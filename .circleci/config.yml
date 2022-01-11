@@ -26,4 +26,3 @@ workflows:
                   - main        
       jobs:
         - imajob
-    
