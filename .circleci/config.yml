@@ -1,28 +1,38 @@
-version: 2.1
-
-orbs:
-  slack: circleci/slack@4.5.0
-
+version: 2 # use CircleCI 2.0
 jobs:
-  imajob:
+  build:
     docker:
-      - image: cimg/node:17.1.0  
+      - image: circleci/node:10
     steps:
-      - checkout
+      - checkout # special step to check out source code to working directory
+
+      - restore_cache: # special step to restore the dependency cache
+          # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
+          keys: 
+            - v1-repo-{{ checksum "package-lock.json" }}
+
       - run:
-          name: echo hi
-          command: echo "hi"
-      - slack/notify
+          name: Install dependencies with NPM
+          command: npm install # replace with `yarn install` if using yarn
+
+      - save_cache: # special step to save the dependency cache
+          key: v1-repo-{{ checksum "package-lock.json" }}
+          paths:
+            - "node_modules"
+
+      - run:
+          name: Run tests
+          # Runs jest with "--maxWorkers=2" argument to avoid OOM issues
+          command: npm test # replace with `yarn test` if using yarn
+
+      - store_artifacts: 
+          path: test-results
+
+      - store_test_results:
+          path: test-results
 
 workflows:
   version: 2
-  imaworkflow:
-    triggers:
-      - schedule:
-          cron: "0 0 * * *"       
-          filters:
-            branches:
-              only:
-                - main        
+  Build and Test:
     jobs:
-      - imajob
+      - build
