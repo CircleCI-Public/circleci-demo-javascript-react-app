@@ -1,14 +1,53 @@
 version: 2.1
 
-jobs:
-  setup:
-    machine: true
-    resource_class: ao32/pillar23
+parameters:
+  condition_1:
+    type: boolean
+    default: false
+  condition_2:
+    type: boolean
+    default: false
+  
+
+commands:
+  cancel-job:
     steps:
-      - checkout
+      - run:
+          name: Cancel job
+          command: |
+            response=$(curl -X POST https://circleci.com/api/v2/project/gh/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/job/$CIRCLE_BUILD_NUM/cancel\?circle-token\=$CIRCLE_CI_TOKEN | jq '.message')
+
+            if [[ $response == "\"Accepted.\"" ] && [ $CIRCLE_PULL_REQUEST == '' ]] ; then
+              echo "Job is being canceled, sleep."
+              sleep infinity
+            else
+              echo "Could not cancel job."
+              echo "$response"
+              exit 1
+            fi
+          when: on_success
+
+  check_something:
+    steps:
+      - run: 
+          name: check if condition 1 and condition 2 are true
+          command: |
+            if [ condition 1 ] && [ condition 2 ]; then
+               continue
+            fi
+      - cancel-job
+          
+            
+
+jobs:
+  job1: 
+    docker: 
+      - image: cimg/node:14.18.2
+    steps: 
+      - check_something
 
 workflows:
   version: 2
-  pull-request:
+  cancel-on-condition:
     jobs:
-      - setup
+      - job1
