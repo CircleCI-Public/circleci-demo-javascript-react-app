@@ -17,7 +17,7 @@ commands:
           command: |
             response=$(curl -X POST https://circleci.com/api/v2/project/gh/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/job/$CIRCLE_BUILD_NUM/cancel\?circle-token\=$CIRCLE_CI_TOKEN | jq '.message')
 
-            if [[ $response == "\"Accepted.\"" ] && [ $CIRCLE_PULL_REQUEST == '' ]] ; then
+            if [[ $response == "\"Accepted.\"" && $CIRCLE_PULL_REQUEST == '' ]] ; then
               echo "Job is being canceled, sleep."
               sleep infinity
             else
