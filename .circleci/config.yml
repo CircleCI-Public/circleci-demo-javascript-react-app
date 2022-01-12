@@ -15,7 +15,7 @@ commands:
       - run:
           name: Cancel job
           command: |
-            response=$(curl -X POST https://circleci.com/api/v2/project/gh/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/job/$CIRCLE_BUILD_NUM/cancel\?circle-token\=$CIRCLE_CI_TOKEN | jq '.message')
+            response=$(curl -X POST https://circleci.com/api/v2/project/gh/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/job/$CIRCLE_BUILD_NUM/cancel\?circle-token\=$CIRCLE_TOKEN | jq '.message')
 
             if [[ $response == "\"Accepted.\"" && $CIRCLE_PULL_REQUEST == '' ]] ; then
               echo "Job is being canceled, sleep."
@@ -50,4 +50,6 @@ workflows:
   version: 2
   cancel-on-condition:
     jobs:
-      - job1
+      - job1:
+          context: 
+            - CIRCLE_TOKEN
