@@ -42,11 +42,3 @@ workflows:
           filters:
             branches:
               only: master # only deploy when on main
-    triggers:
-      - schedule:
-          cron: "0 0 * * *"       
-          filters:
-            branches:
-              only:
-                - master
-                - docs-nodejs-language-guide
