@@ -16,14 +16,7 @@ jobs:
 
 workflows:
     version: 2
-    imaworkflow:
-      triggers:
-        - schedule:
-            cron: "0 0 0 0 0"       
-            filters:
-              branches:
-                only:
-                  - master        
+    imaworkflow:  
       jobs:
         - imajob
     
