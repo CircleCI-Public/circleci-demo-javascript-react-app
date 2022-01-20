@@ -1,14 +1,43 @@
+orbs:
+  circle-node: circleci/node@4.7.0
+
+default-executor: &default-executor
+  executor:
+    name: 'circle-node/default'
+
+runner-executor: &runner-executor
+  machine: true
+  resource_class: jkg-runner/jkg-resource-class
+
 version: 2.1
 
 jobs:
-  setup:
-    machine: true
-    resource_class: ao32/pillar23
+  app-modified-echo-app-modified:
+    <<: *runner-executor
     steps:
       - checkout
+      - run: 
+          name: echo app modified
+          command: |
+            
+            echo "app modified"
+      - run: 
+          name: call api curl
+          command: |
+            
+            echo "curl "
+            curl --request POST --url https://circleci.com/api/v2/pipeline/continue -H "Circle-Token: $CIRCLE_TOKEN" -H 'content-type: application/json' -d '{"continuation-key":$CIRCLE_CONTINUATION_KEY,"configuration":"string","parameters":{"deploy_prod":true}}'
+            curl -X POST -H "Circle-Token: $CIRCLE_TOKEN" -H "Content-Type: application/json" -d '{"name":"extension_build","value":"${BUILD_COUNTER}"}' https://circleci.com/api/v2/project/github/jkzilla/circleci-demo-javascript-react-app/envvar \
+
+      - run: 
+          name: List Env Vars
+          command: |
+            curl -H "Circle-Token: $CIRCLE_TOKEN" https://circleci.com/api/v2/project/github/jkzilla/circleci-demo-javascript-react-app/envvar
+
 
 workflows:
-  version: 2
-  pull-request:
+  test-script:
     jobs:
-      - setup
+      - test-script:
+          context: CIRCLE_CONTINUATION_KEY
+           
