@@ -1,22 +1,57 @@
 version: 2.1
-
 orbs:
-  slack: circleci/slack@4.5.0
+  node: circleci/node@4.7.0
+  heroku: circleci/heroku@1.2.6
 
 jobs:
-  imajob:
+  build_and_test:
     docker:
-      - image: cimg/node:17.1.0  
+      - image: cimg/node:17.2.0
     steps:
       - checkout
+      - node/install-packages:
+          pkg-manager: yarn
       - run:
-          name: echo hi
-          command: echo "hi"
-      - slack/notify
+          command: yarn test
+          name: Run tests
+      - run:
+          command: yarn build
+          name: Build app
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - .
+  deploy: # this can be any name you choose
+    docker:
+      - image: cimg/node:17.2.0
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - heroku/deploy-via-git: 
+          force: true # force push when pushing to the heroku remote, see: https://devcenter.heroku.com/articles/git
 
 workflows:
-    version: 2
-    imaworkflow:  
-      jobs:
-        - imajob
-    
+  on_commit:
+    jobs:
+      - build_and_test
+      # Follow instructions here to authenticate git for Heroku: https://devcenter.heroku.com/articles/git#http-git-authentication
+      # The following code may be uncommented, onnce HEROKU_API_KEY & HEROKU_APP_NAME environemnt variables are present
+      # Read more: https://circleci.com/docs/2.0/env-vars/
+      # - deploy:
+      #     requires:
+      #       - build_and_test # only deploy if the build_and_test job has completed
+      #     filters:
+      #       branches:
+      #         only: master # only deploy when on main/master
+
+    jobs:
+      - build_and_test
+      # Follow instructions here to authenticate git for Heroku: https://devcenter.heroku.com/articles/git#http-git-authentication
+      # The following code may be uncommented, onnce HEROKU_API_KEY & HEROKU_APP_NAME environemnt variables are present
+      # Read more: https://circleci.com/docs/2.0/env-vars/
+      # - deploy:
+      #     requires:
+      #       - build_and_test # only deploy if the build_and_test job has completed
+      #     filters:
+      #       branches:
+      #         only: master # only deploy when on main/master
