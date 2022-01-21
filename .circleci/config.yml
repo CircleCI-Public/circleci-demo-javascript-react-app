@@ -1,6 +1,7 @@
 orbs:
   circle-node: circleci/node@4.7.0
   docker: circleci/docker@2.0.1
+  continuation: circleci/continuation@0.2.0
 
 default-executor: &default-executor
   executor:
@@ -24,11 +25,10 @@ jobs:
               continue;
             else;
               exit 1
-
-workflows:
-  test-script:
-    jobs:
-      - checking-branch
       - continuation/continue:
-          configuration_path: ./config2.yml      
+          configuration_path: ./config2.yml  
+workflows:
+  run-if-main:
+    jobs:
+      - checking-branch 
            
