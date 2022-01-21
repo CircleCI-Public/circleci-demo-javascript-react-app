@@ -31,6 +31,5 @@ jobs:
 workflows:
   run-if-main:
     jobs:
-      - checking-branch:
-          context: CIRCLE_CONTINUATION_KEY
+      - checking-branch
            
