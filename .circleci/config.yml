@@ -19,6 +19,7 @@ jobs:
   checking-branch:
     <<: *default-executor
     steps:
+      - checkout
       - run: 
           command: |
             if [ << pipeline.git.branch >> == "main" ]; then
