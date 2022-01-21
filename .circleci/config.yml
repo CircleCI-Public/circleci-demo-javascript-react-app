@@ -22,10 +22,8 @@ jobs:
       - checkout
       - run: 
           command: |
-            while [ << pipeline.git.branch >> == "main" ]; then
+            if [ << pipeline.git.branch >> == "main" ]; then
               continue
-            else
-              exit 1
             fi
       - continuation/continue:
           configuration_path: home/project/.circleci/config2.yml  
