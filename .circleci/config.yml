@@ -1,5 +1,6 @@
 orbs:
   circle-node: circleci/node@4.7.0
+  docker: circleci/docker@2.0.1
 
 default-executor: &default-executor
   executor:
@@ -11,33 +12,23 @@ runner-executor: &runner-executor
 
 version: 2.1
 
+setup: true
+
 jobs:
-  app-modified-echo-app-modified:
-    <<: *runner-executor
+  checking-branch:
+    <<: *default-executor
     steps:
-      - checkout
       - run: 
-          name: echo app modified
           command: |
-            
-            echo "app modified"
-      - run: 
-          name: call api curl
-          command: |
-            
-            echo "curl "
-            curl --request POST --url https://circleci.com/api/v2/pipeline/continue -H "Circle-Token: $CIRCLE_TOKEN" -H 'content-type: application/json' -d '{"continuation-key":$CIRCLE_CONTINUATION_KEY,"configuration":"string","parameters":{"deploy_prod":true}}'
-            curl -X POST -H "Circle-Token: $CIRCLE_TOKEN" -H "Content-Type: application/json" -d '{"name":"extension_build","value":"${BUILD_COUNTER}"}' https://circleci.com/api/v2/project/github/jkzilla/circleci-demo-javascript-react-app/envvar \
-
-      - run: 
-          name: List Env Vars
-          command: |
-            curl -H "Circle-Token: $CIRCLE_TOKEN" https://circleci.com/api/v2/project/github/jkzilla/circleci-demo-javascript-react-app/envvar
-
+            if [ << pipeline.git.branch >> == "main" ];
+              continue;
+            else;
+              exit 1
 
 workflows:
   test-script:
     jobs:
-      - test-script:
-          context: CIRCLE_CONTINUATION_KEY
+      - checking-branch
+      - continuation/continue:
+          configuration_path: ./config2.yml      
            
