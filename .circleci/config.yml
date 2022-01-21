@@ -21,10 +21,11 @@ jobs:
     steps:
       - run: 
           command: |
-            if [ << pipeline.git.branch >> == "main" ];
-              continue;
-            else;
+            if [ << pipeline.git.branch >> == "main" ]; then
+              continue
+            else
               exit 1
+            fi
       - continuation/continue:
           configuration_path: ./config2.yml  
 workflows:
