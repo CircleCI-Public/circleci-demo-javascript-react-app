@@ -23,7 +23,7 @@ jobs:
       - run: 
           command: |
             if [ << pipeline.git.branch >> != "main" ]; then
-              exit 1
+              exit 1 
             fi
       - continuation/continue:
           configuration_path: config2.yml  
