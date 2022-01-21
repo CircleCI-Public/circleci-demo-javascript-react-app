@@ -27,7 +27,7 @@ jobs:
               exit 1
             fi
       - continuation/continue:
-          configuration_path: ./.circleci/config2.yml  
+          configuration_path: config2.yml  
 workflows:
   run-if-main:
     jobs:
