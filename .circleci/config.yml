@@ -27,9 +27,10 @@ jobs:
               exit 1
             fi
       - continuation/continue:
-          configuration_path: ./config2.yml  
+          configuration_path: ./.circleci/config2.yml  
 workflows:
   run-if-main:
     jobs:
-      - checking-branch 
+      - checking-branch:
+          context: CIRCLE_CONTINUATION_KEY
            
