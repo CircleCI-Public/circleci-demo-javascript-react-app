@@ -22,6 +22,7 @@ jobs:
   static-analysis: 
     executor: 
       name: node/default
+    working_directory: ~/project
     steps:
       - checkout    
       - run: 
