@@ -2,7 +2,7 @@ version: 2.1
 
 parameters:
   continue_pr:
-    type: Boolean
+    type: boolean
     default: true 
 
 executors:
