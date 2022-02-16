@@ -28,7 +28,9 @@ jobs:
       - run: 
           command: | 
             sleep 10
+            curl --request GET --url https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job --header 'Circle-Token: $CIRCLE_TOKEN'
             node ~/project/.circleci/scripts/cancelWorkflow.js $CIRCLE_BUILD_NUM $CIRCLE_TOKEN
+
   linux: 
     executor: default
     steps:
