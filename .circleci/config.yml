@@ -1,34 +1,73 @@
-orbs:
-  circle-node: circleci/node@4.7.0
-  docker: circleci/docker@2.0.1
-  continuation: circleci/continuation@0.2.0
-
-default-executor: &default-executor
-  executor:
-    name: 'circle-node/default'
-
-runner-executor: &runner-executor
-  machine: true
-  resource_class: jkg-runner/jkg-resource-class
-
 version: 2.1
 
-setup: true
+executors:
+    default:
+        description: |
+            The executor for continuations
+        docker:
+            - image: cimg/base:stable
+        resource_class: small
 
-jobs:
-  checking-branch:
-    <<: *default-executor
+jobs: 
+  check-if-pr-is-ready:
+    executor: default
     steps:
-      - checkout
       - run: 
-          command: |
-            if [ << pipeline.git.branch >> != "main" ]; then
-              break
-            fi
-      - continuation/continue:
-          configuration_path: config2.yml  
+          command: | 
+            echo "hi"
+  lint:
+    executor: default
+    steps:
+      - run: 
+          command: | 
+            echo "hi"
+
+  static-analysis: 
+    executor: default
+    steps:
+      - run: 
+          command: | 
+            echo "hi"
+  linux: 
+    executor: default
+    steps:
+      - run: 
+          command: | 
+            echo "hi"
+  compute-high-level-metrics: 
+    executor: default
+    steps:
+      - run: 
+          command: | 
+            echo "hi"
+  compute-low-level-metrics: 
+    executor: default
+    steps:
+      - run: 
+          command: | 
+            echo "hi"
+
+  build-template: 
+    executor: default
+    steps:
+      - run: 
+          command: | 
+            echo "hi"
 workflows:
-  run-if-main:
+
+  default:
     jobs:
-      - checking-branch
-           
+      - check-if-pr-is-ready
+      - lint
+      - static-analysis:
+          requires: [ 'check-if-pr-is-ready' ]
+      - linux:
+          requires: [ 'check-if-pr-is-ready' ]
+      - compute-high-level-metrics:
+          requires:
+            - linux
+      - compute-low-level-metrics:
+          requires:
+            - linux
+      - build-template:
+          requires: [ 'check-if-pr-is-ready' ]
