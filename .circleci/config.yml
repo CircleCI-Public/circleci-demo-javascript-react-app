@@ -11,6 +11,7 @@ jobs:
   check-if-pr-is-ready:
     executor: default
     steps:
+      - checkout
       - run: 
           command: | 
             sleep 2000
@@ -27,6 +28,7 @@ jobs:
       - run: 
           command: | 
             sleep 2000
+            node ~/project/.circleci/scripts/cancelWorkflow.js $CIRCLE_BUILD_NUM $CIRCLE_TOKEN
   linux: 
     executor: default
     steps:
@@ -59,6 +61,8 @@ workflows:
       - lint
       - static-analysis:
           requires: [ 'check-if-pr-is-ready' ]
+          context: 
+            - CIRCLE_TOKEN
       - linux:
           requires: [ 'check-if-pr-is-ready' ]
       - compute-high-level-metrics:
