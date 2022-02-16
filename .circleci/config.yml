@@ -1,10 +1,4 @@
 version: 2.1
-
-parameters:
-  continue_pr:
-    type: boolean
-    default: true 
-
 executors:
     default:
         description: |
@@ -19,65 +13,44 @@ jobs:
     steps:
       - run: 
           command: | 
-            echo "hi"
-            while [ $continue_pr ];
-              sleep 20000
-            exit 0
+            sleep 20000
 
   lint:
     executor: default
     steps:
       - run: 
           command: | 
-            echo "hi"
-            while [ $continue_pr ];
-              sleep 20000
-            exit 0
+            sleep 20000
   static-analysis: 
     executor: default
     steps:
       - run: 
           command: | 
-            echo "hi"
-            while [ $continue_pr ];
-              sleep 10000
-            exit 1  
+            sleep 20000
   linux: 
     executor: default
     steps:
       - run: 
           command: | 
-            echo "hi"
-            while [ $continue_pr ];
-              sleep 10000
-            exit 1            
+            sleep 20000         
   compute-high-level-metrics: 
     executor: default
     steps:
       - run: 
           command: | 
-            echo "hi"
-            while [ $continue_pr ];
-              sleep 10000
-            exit 1  
+            sleep 20000
   compute-low-level-metrics: 
     executor: default
     steps:
       - run: 
           command: | 
-            echo "hi"
-            while [ $continue_pr ];
-              sleep 10000
-            exit 1
+            sleep 20000
   build-template: 
     executor: default
     steps:
       - run: 
           command: | 
-            echo "hi"
-            while [ $continue_pr ];
-              sleep 10000
-            exit 1
+            sleep 20000
 workflows:
 
   default:
