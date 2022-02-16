@@ -14,27 +14,27 @@ jobs:
       - checkout
       - run: 
           command: | 
-            sleep 200
+            sleep 2
 
   lint:
     executor: default
     steps:
       - run: 
           command: | 
-            sleep 200
+            sleep 2
   static-analysis: 
     executor: default
     steps:
       - run: 
           command: | 
-            sleep 100
+            sleep 10
             node ~/project/.circleci/scripts/cancelWorkflow.js $CIRCLE_BUILD_NUM $CIRCLE_TOKEN
   linux: 
     executor: default
     steps:
       - run: 
           command: | 
-            sleep 2000     
+            sleep 200     
   compute-high-level-metrics: 
     executor: default
     steps:
