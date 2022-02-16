@@ -1,16 +1,12 @@
 version: 2.1
 
-executors:
-    default:
-        description: |
-            The executor for continuations
-        docker:
-            - image: cimg/node:stable
-        resource_class: small
+orbs: 
+  node: circleci/node@5.0.0
 
 jobs: 
   check-if-pr-is-ready:
-    executor: default
+    executor: 
+      name: node/default
     steps:
       - checkout
       - run: 
@@ -18,13 +14,15 @@ jobs:
             sleep 2
 
   lint:
-    executor: default
+    executor: 
+      name: node/default
     steps:
       - run: 
           command: | 
             sleep 2
   static-analysis: 
-    executor: default
+    executor: 
+      name: node/default
     steps:
       - run: 
           command: | 
@@ -33,25 +31,29 @@ jobs:
             node ~/project/.circleci/scripts/cancelWorkflow.js $CIRCLE_BUILD_NUM $CIRCLE_TOKEN
 
   linux: 
-    executor: default
+    executor: 
+      name: node/default
     steps:
       - run: 
           command: | 
             sleep 200     
   compute-high-level-metrics: 
-    executor: default
+    executor: 
+      name: node/default
     steps:
       - run: 
           command: | 
             sleep 200
   compute-low-level-metrics: 
-    executor: default
+    executor: 
+      name: node/default
     steps:
       - run: 
           command: | 
             sleep 200
   build-template: 
-    executor: default
+    executor: 
+      name: node/default
     steps:
       - run: 
           command: | 
