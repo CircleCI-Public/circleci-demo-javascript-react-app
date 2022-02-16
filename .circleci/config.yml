@@ -1,10 +1,11 @@
 version: 2.1
+
 executors:
     default:
         description: |
             The executor for continuations
         docker:
-            - image: cimg/base:stable
+            - image: cimg/node:stable
         resource_class: small
 
 jobs: 
