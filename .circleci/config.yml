@@ -4,6 +4,7 @@ orbs:
   node: circleci/node@5.0.0
 
 jobs: 
+#tier1
   check-if-pr-is-ready:
     executor: 
       name: node/default
@@ -19,6 +20,8 @@ jobs:
       - run: 
           command: | 
             sleep 2
+
+#tier2
   static-analysis: 
     executor: 
       name: node/default
@@ -27,12 +30,14 @@ jobs:
       - checkout    
       - run: 
           command: | 
-            sleep 10
-            curl --request GET --url https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job --header 'Circle-Token: $CIRCLE_TOKEN'
+            curl --request GET --url https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job --header 'Circle-Token: $CIRCLE_TOKEN' >> jobsInWorkflow.json
       # - run: 
       #     command: | 
       #       curl -X POST --header "Content-Type: application/json" "https://circleci.com/api/v2/project/gh/jkzilla/circleci-demo-javascript-react-app/job/${CIRCLE_BUILD_NUM}/cancel?circle-token=${CIRCLE_TOKEN}" 
-
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - jobsInWorkflow.json
   linux: 
     executor: 
       name: node/default
@@ -62,6 +67,11 @@ jobs:
       - run: 
           command: | 
             sleep 200
+      - attach_workspace:
+          at: .
+      - run:
+          command: |
+            cat jobsInWorkflow.json
             curl -X POST --header "Content-Type: application/json" "https://circleci.com/api/v2/project/gh/jkzilla/circleci-demo-javascript-react-app/job/${CIRCLE_BUILD_NUM}/cancel?circle-token=${CIRCLE_TOKEN}" 
 
 workflows:
