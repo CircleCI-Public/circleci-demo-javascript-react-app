@@ -27,7 +27,18 @@ jobs:
       name: node/default
     working_directory: ~/project
     steps:
-      - checkout    
+      - run: 
+          command: | 
+            sleep 2          
+
+  linux: 
+    executor: 
+      name: node/default
+    steps:
+      - checkout   
+      - run: 
+          command: | 
+            sleep 2    
       - run: 
           command: | 
             curl --request GET --url https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job --header 'Circle-Token: $CIRCLE_TOKEN' | jq > jobsInWorkflow.json
@@ -39,13 +50,6 @@ jobs:
           root: .
           paths:
             - "*"
-  linux: 
-    executor: 
-      name: node/default
-    steps:
-      - run: 
-          command: | 
-            sleep 2    
   compute-high-level-metrics: 
     executor: 
       name: node/default
