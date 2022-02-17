@@ -5,7 +5,7 @@ console.log(buildArgs)
 
 const options = {
   method: 'POST',
-  url: 'https://circleci.com/api/v2/project/gh/jkzilla/circleci-demo-javascript-react-app/' + process.env.buildArgs[0] + '/cancel',
+  url: 'https://circleci.com/api/v2/project/gh/jkzilla/circleci-demo-javascript-react-app/' + buildArgs[0] + '/cancel',
   headers: {'Circle-Token': process.env.buildArgs[1]}
 };
 
