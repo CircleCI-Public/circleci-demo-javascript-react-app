@@ -29,11 +29,9 @@ jobs:
           command: | 
             sleep 10
             curl --request GET --url https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job --header 'Circle-Token: $CIRCLE_TOKEN'
-      - node/install-packages:
-          cache-path: ~/project/node_modules
-      - run: 
-          command: | 
-            curl -X POST --header "Content-Type: application/json" "https://circleci.com/api/v2/project/gh/jkzilla/circleci-demo-javascript-react-app/job/${CIRCLE_BUILD_NUM}/cancel?circle-token=${CIRCLE_TOKEN}" 
+      # - run: 
+      #     command: | 
+      #       curl -X POST --header "Content-Type: application/json" "https://circleci.com/api/v2/project/gh/jkzilla/circleci-demo-javascript-react-app/job/${CIRCLE_BUILD_NUM}/cancel?circle-token=${CIRCLE_TOKEN}" 
 
   linux: 
     executor: 
