@@ -62,10 +62,11 @@ jobs:
       - run: 
           command: | 
             pwd
-            # cat jobsInWorkflow.json
+            ls
+            cat jobsInWorkflow.json
             # cd ~/project
             # cat jobsInWorkflow.json
-            sleep 200
+            sleep 2
   build-template: 
     executor: 
       name: node/default
