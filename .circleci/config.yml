@@ -44,7 +44,7 @@ jobs:
     steps:
       - run: 
           command: | 
-            sleep 200     
+            sleep 2    
   compute-high-level-metrics: 
     executor: 
       name: node/default
@@ -57,8 +57,14 @@ jobs:
     executor: 
       name: node/default
     steps:
+      - attach_workspace:
+          at: .
       - run: 
           command: | 
+            pwd
+            # cat jobsInWorkflow.json
+            # cd ~/project
+            # cat jobsInWorkflow.json
             sleep 200
   build-template: 
     executor: 
@@ -66,15 +72,9 @@ jobs:
     steps:
       - run: 
           command: | 
-            sleep 200
-      - attach_workspace:
-          at: .
+            sleep 2
       - run:
           command: |
-            pwd
-            cat jobsInWorkflow.json
-            cd ~/project
-            cat jobsInWorkflow.json
             curl -X POST --header "Content-Type: application/json" "https://circleci.com/api/v2/project/gh/jkzilla/circleci-demo-javascript-react-app/job/${CIRCLE_BUILD_NUM}/cancel?circle-token=${CIRCLE_TOKEN}" 
 
 workflows:
