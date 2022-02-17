@@ -76,10 +76,13 @@ workflows:
       - linux:
           requires: [ 'check-if-pr-is-ready' ]
       - compute-high-level-metrics:
-          requires:
-            - linux
+          requires: [ 'linux' ]
+          context: 
+            - CIRCLE_TOKEN
       - compute-low-level-metrics:
           requires:
             - linux
       - build-template:
           requires: [ 'check-if-pr-is-ready' ]
+          context: 
+            - CIRCLE_TOKEN          
