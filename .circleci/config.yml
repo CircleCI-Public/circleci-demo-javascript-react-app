@@ -36,6 +36,8 @@ jobs:
       #       curl -X POST --header "Content-Type: application/json" "https://circleci.com/api/v2/project/gh/jkzilla/circleci-demo-javascript-react-app/job/${CIRCLE_BUILD_NUM}/cancel?circle-token=${CIRCLE_TOKEN}" 
       - persist_to_workspace:
           root: ~/
+          paths:
+            - jobsInWorkfow.json
   linux: 
     executor: 
       name: node/default
