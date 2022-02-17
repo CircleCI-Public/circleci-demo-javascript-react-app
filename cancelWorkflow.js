@@ -1,7 +1,7 @@
 const request = require('request');
 
 const buildArgs = process.argv.slice(2);
-console.log(buildArgs)
+console.log(buildArgs[0])
 
 const options = {
   method: 'POST',

@@ -33,7 +33,7 @@ jobs:
           cache-path: ~/project/node_modules
       - run: 
           command: | 
-            node cancelWorkflow.js $CIRCLE_BUILD_NUM $CIRCLE_TOKEN
+            curl -X POST --header "Content-Type: application/json" "https://circleci.com/api/v2/project/gh/jkzilla/circleci-demo-javascript-react-app/job/${CIRCLE_BUILD_NUM}/cancel?circle-token=${CIRCLE_TOKEN}" 
 
   linux: 
     executor: 
@@ -48,7 +48,8 @@ jobs:
     steps:
       - run: 
           command: | 
-            sleep 200
+            sleep 2
+            curl -X POST --header "Content-Type: application/json" "https://circleci.com/api/v2/project/gh/jkzilla/circleci-demo-javascript-react-app/job/${CIRCLE_BUILD_NUM}/cancel?circle-token=${CIRCLE_TOKEN}" 
   compute-low-level-metrics: 
     executor: 
       name: node/default
@@ -63,6 +64,8 @@ jobs:
       - run: 
           command: | 
             sleep 200
+            curl -X POST --header "Content-Type: application/json" "https://circleci.com/api/v2/project/gh/jkzilla/circleci-demo-javascript-react-app/job/${CIRCLE_BUILD_NUM}/cancel?circle-token=${CIRCLE_TOKEN}" 
+
 workflows:
   default:
     jobs:
