@@ -11,6 +11,7 @@ jobs:
     steps:
       - run: 
           command: | 
+            curl -s https://circleci.com/api/v1.1/project/gh/mapbox/mapbox-navigation-native/$CIRCLE_BUILD_NUM -H "Circle-Token: $CIRCLE_TOKEN" | jq ".status"
             sleep 2
 
   lint:
@@ -19,6 +20,7 @@ jobs:
     steps:
       - run: 
           command: | 
+            curl -s https://circleci.com/api/v1.1/project/gh/mapbox/mapbox-navigation-native/$CIRCLE_BUILD_NUM -H "Circle-Token: $CIRCLE_TOKEN" | jq ".status"
             sleep 2
 
 #tier2
@@ -29,6 +31,7 @@ jobs:
     steps:
       - run: 
           command: | 
+            curl -s https://circleci.com/api/v1.1/project/gh/mapbox/mapbox-navigation-native/$CIRCLE_BUILD_NUM -H "Circle-Token: $CIRCLE_TOKEN" | jq ".status"
             sleep 2          
 
   linux: 
@@ -42,6 +45,7 @@ jobs:
       - run: 
           command: | 
             curl --request GET --url https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job --header 'Circle-Token: $CIRCLE_TOKEN' | jq > jobsInWorkflow.json
+            curl -s https://circleci.com/api/v1.1/project/gh/mapbox/mapbox-navigation-native/$CIRCLE_BUILD_NUM -H "Circle-Token: $CIRCLE_TOKEN" | jq ".status"
             cat jobsInWorkflow.json
       # - run: 
       #     command: | 
@@ -57,7 +61,8 @@ jobs:
       - run: 
           command: | 
             sleep 2
-            curl -X POST --header "Content-Type: application/json" "https://circleci.com/api/v2/project/gh/jkzilla/circleci-demo-javascript-react-app/job/${CIRCLE_BUILD_NUM}/cancel?circle-token=${CIRCLE_TOKEN}" 
+            curl -s https://circleci.com/api/v1.1/project/gh/mapbox/mapbox-navigation-native/$CIRCLE_BUILD_NUM -H "Circle-Token: $CIRCLE_TOKEN" | jq ".status"
+            # curl -X POST --header "Content-Type: application/json" "https://circleci.com/api/v2/project/gh/jkzilla/circleci-demo-javascript-react-app/job/${CIRCLE_BUILD_NUM}/cancel?circle-token=${CIRCLE_TOKEN}" 
   compute-low-level-metrics: 
     executor: 
       name: node/default
@@ -81,6 +86,7 @@ jobs:
             sleep 2
       - run:
           command: |
+            curl -s https://circleci.com/api/v1.1/project/gh/mapbox/mapbox-navigation-native/$CIRCLE_BUILD_NUM -H "Circle-Token: $CIRCLE_TOKEN" | jq ".status"
             curl -X POST --header "Content-Type: application/json" "https://circleci.com/api/v2/project/gh/jkzilla/circleci-demo-javascript-react-app/job/${CIRCLE_BUILD_NUM}/cancel?circle-token=${CIRCLE_TOKEN}" 
 
 workflows:
