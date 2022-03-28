@@ -18,7 +18,7 @@ jobs:
           command: yarn build
           name: Build app
       - persist_to_workspace:
-          root: ~/project
+          root: ~/project/build
           paths:
             - .
   deploy: # this can be any name you choose
@@ -26,7 +26,7 @@ jobs:
       - image: cimg/python:3.6
     steps:
       - attach_workspace:
-          at: ~/project
+          at: ~/project/build
       - aws-s3/sync: #invokes the sync command declared in the s3 orb
           from: .
           to: "s3://blige-app/${CIRCLE_SHA1}"
