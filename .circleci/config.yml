@@ -26,7 +26,7 @@ jobs:
       - image: cimg/python:3.6
     steps:
       - attach_workspace:
-          at: ~/project/build
+          at: ~/project
       - aws-s3/sync: #invokes the sync command declared in the s3 orb
           from: .
           to: "s3://blige-app/${CIRCLE_SHA1}"
