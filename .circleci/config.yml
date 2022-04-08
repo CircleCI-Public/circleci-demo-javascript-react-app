@@ -1,44 +1,21 @@
 version: 2.1
-setup: true
-
-parameters:
-  run_deploy:
-    type: boolean
-    default: false
-  run_smokes:
-    type: boolean
-    default: true
-
-
-orbs:
-  continuation: circleci/continuation@0.2.0
-
 jobs:
-  generate-regressions-config:
-    executor: continuation/default
+  build-arm-large:
+    machine:
+      image: ubuntu-2004:202101-01
+    resource_class: arm.large
     steps:
-      - checkout 
-      - run:
-          name: Trying to set a dynamic pipeline var
-          command: |
-            jq --null-input --arg run_deploy << pipeline.parameters.run_deploy >> '{"run_deploy": $run_deploy}' >> params.json
-            cat params.json
-      - continuation/continue:
-          configuration_path: ./regressions_config.yml
-          parameters: ./params.json
-
-  generate-regressions-config-job2:
-    executor: continuation/default
+      - run: uname -a
+      - run: docker-compose --version
+  build-large:
+    machine:
+      image: ubuntu-2004:202101-01
+    resource_class: large
     steps:
-      - checkout
-      - continuation/continue:
-          configuration_path: ./regressions_config.yml
+      - run: uname -a
+      - run: docker-compose --version
 workflows:
-  Performance Action Timing SPEC:
-    unless: << pipeline.parameters.run_smokes >>
+  build:
     jobs:
-      - generate-regressions-config
-  Performance Action Timing SPEC2:
-    when: << pipeline.parameters.run_smokes >>
-    jobs:
-      - generate-regressions-config-job2
+      - build-arm-large
+      - build-large
