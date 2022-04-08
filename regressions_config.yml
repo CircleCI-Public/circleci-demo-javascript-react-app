@@ -1,0 +1,232 @@
+version: 2.1
+
+parameters:
+  browser:
+    type: string
+    default: ${DEFAULT_BROWSER}
+  desktop:
+    type: string
+    default: "false"
+  run_accessibility:
+    type: boolean
+    default: false
+  run_manual_build:
+    type: boolean
+    default: false
+  target_env:
+    description: "Demo Environment to trigger the smoke tests against"
+    type: string
+    default: staging
+  test_path:
+    description: "Path to test folder, or specific test file"
+    type: string
+    default: "\"./tests/**/*.js\""
+
+orbs:
+  slack: circleci/slack@3.4.2
+  browser-tools: circleci/browser-tools@1.1.3
+
+executors:
+  docker_node:
+    docker:
+      - image: cimg/node:current-browsers
+    working_directory: ~/regression-qaa/
+
+commands:
+  env_setup:
+    description: "Set up the test environment"
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-node-modules-{{ checksum "package-lock.json" }}
+      - run: npm install --progress=false
+      - save_cache:
+          key: v1-node-modules-{{ checksum "package-lock.json" }}
+          paths: node_modules
+
+  install_local_browsers:
+      description: Install Chrome and Firefox
+      parameters:
+        chrome_version:
+          type: string
+          default: "latest"
+      steps:
+          - browser-tools/install-firefox
+          - browser-tools/install-chrome:
+              chrome-version: << parameters.chrome_version >>
+
+  accessibility_checks:
+    description: "Run the UI Accessibility Checks"
+    parameters:
+      path:
+        type: string
+        default: << pipeline.parameters.test_path >>
+    steps:
+      - run:
+          name: Run accessibility report
+          command: |
+            export TESTPATH=<< parameters.path >>
+            printf "\nTarget Env:\nstaging\n"
+            printf "\nTest files:\n\n"
+            ./scripts/accessibility -e staging -t ""
+
+  run_regressions:
+    description: "Run the regression tests"
+    parameters:
+      test_path:
+        type: string
+        default: << pipeline.parameters.test_path >>
+      browser:
+        type: string
+        default: << pipeline.parameters.browser >>
+      desktop:
+        type: string
+        default: << pipeline.parameters.desktop >>
+    steps:
+      - run:
+          name: Run regression tests
+          description: Set up the test environment, then run regressions
+          command: |
+            export TESTPATH=$(circleci tests glob << parameters.test_path >> | circleci tests split --split-by=timings)
+            export BROWSER=<< parameters.browser >>
+            if [ << parameters.desktop >> == "true" ]; then
+              export DESKTOP=--run-desktop-tests
+            fi
+            printf "\nTarget browser:\n\n"
+            printf "\nTarget Env:\nstaging\n"
+            printf "\nTest files:\n\n"
+            if [[ "" == *"opera"* ]]; then
+              export BROWSERSTACK_USE_AUTOMATE="0"
+            fi
+
+            ./scripts/test -b "" -e staging 
+
+  upload_results:
+    description: "Upload any test artifacts"
+    steps:
+      - store_test_results:
+          path: ./artifacts/test-results
+      - when:
+          condition: on_fail
+          steps:
+            - store_artifacts:
+                path: ./artifacts
+
+jobs:
+  lint-only:
+    parallelism: 1
+    executor: docker_node
+    steps:
+      - env_setup
+      - run:
+          name: Run lint checks
+          command: npm run lint
+
+  regression_build:
+    circleci_ip_ranges: true
+    executor: docker_node
+    parameters:
+      browser:
+        type: string
+        default: << pipeline.parameters.browser >>
+      chrome_browser_version:
+        type: string
+        default: "latest"
+      parallelism:
+        type: integer
+        default: 10
+      desktop:
+        type: string
+        default: << pipeline.parameters.desktop >>
+      path:
+        type: string
+        default: << pipeline.parameters.test_path >>
+    parallelism: << parameters.parallelism >>
+    steps:
+      - env_setup
+      - install_local_browsers:
+          chrome_version: << parameters.chrome_browser_version >>
+      - run_regressions:
+          browser: << parameters.browser >>
+          desktop: << parameters.desktop >>
+          test_path: << parameters.path >>
+      - upload_results
+
+  accessibility_build:
+    executor: docker_node
+    parameters:
+      path:
+        type: string
+        default: << pipeline.parameters.test_path >>
+    parallelism: 1
+    steps:
+      - env_setup
+      - install_local_browsers
+      - accessibility_checks:
+          path: << parameters.path >>
+      - upload_results
+      - slack/notify:
+          message: The Accessibility tests for staging have finished. Click here to view the report.
+          webhook: 
+
+workflows:
+  staging_full_regression_run:
+    unless:
+      or: [ << pipeline.parameters.run_accessibility >>, << pipeline.parameters.run_manual_build >> ]
+    jobs:
+      - lint-only
+      - regression_build:
+          name: Site Tour
+          path: "\"./tests/site_navigation/**/*.js\""
+          parallelism: 1
+          requires:
+            - lint-only
+      - regression_build:
+          name: Promotions
+          path: "\"./tests/payments/promotions/**/*.js\""
+          browser: "'chrome:headless'"
+          desktop: "true"
+          parallelism: 20
+          requires:
+            - lint-only
+      - regression_build:
+          name: Membership
+          path: "\"./tests/payments/membership/**/*.js\""
+          browser: "'chrome:headless'"
+          desktop: "true"
+          parallelism: 15
+          requires:
+            - lint-only
+      - regression_build:
+          name: Petitions
+          path: "\"./tests/petitions/**/*.js\""
+          parallelism: 10
+          requires:
+            - lint-only
+      - regression_build:
+          name: Search
+          path: "\"./tests/search/**/*.js\""
+          parallelism: 1
+          requires:
+            - lint-only
+      - regression_build:
+          name: Activity Metric Service
+          path: "\"./tests/user_activity_metrics/**/*.js\""
+          parallelism: 1
+          requires:
+            - lint-only
+      - regression_build:
+          name: Users
+          path: "\"./tests/users/**/*.js\""
+          parallelism: 2
+          requires:
+            - lint-only
+  staging_custom_regression_run:
+    when: << pipeline.parameters.run_manual_build >>
+    jobs:
+      - regression_build:
+          name: staging_custom_run
+  accessibility_run:
+    when: << pipeline.parameters.run_accessibility >>
+    jobs:
+      - accessibility_build

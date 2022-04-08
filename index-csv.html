@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Parse CSV File</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- CSS only -->
+        <link rel="stylesheet" href="">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+        <!-- Papa parse min js-->
+        <script src="https://unpkg.com/papaparse@latest/papaparse.min.js"></script>
+    </head>
+    <body>
+        
+        <form class="form-inline">
+            <div class="form-group">
+            <label for="files">Upload a CSV formatted file here:</label>
+            <input type="file" id="files"  class="form-control" accept=".csv" required />
+            </div>
+            <div class="form-group">
+            <button type="submit" id="submit-file" class="btn btn-primary">Upload File</button>
+            </div>
+        </form>
+        <script src="script.js" async defer></script>
+    </body>
+</html>
