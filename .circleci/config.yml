@@ -41,8 +41,4 @@ workflows:
   Performance Action Timing SPEC2:
     when: << pipeline.parameters.run_smokes >>
     jobs:
-      - generate-regressions-config
-  Performance Action Timing SPEC3:
-    when: << pipeline.parameters.run_smokes >>
-    jobs:
       - generate-regressions-config-job2
