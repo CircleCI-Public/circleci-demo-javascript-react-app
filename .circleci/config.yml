@@ -46,7 +46,7 @@ jobs:
           command: |
             echo 'export RUN_DEPLOY=<< pipeline.parameters.run_deploy >>' >> $BASH_ENV # just an example, hash will be generated based on more complex logic
             touch parameters.json
-            echo '{"run_deploy": ${RUN_DEPLOY}' > parameters.json
+            echo '{"run_deploy": ${RUN_DEPLOY}}' > parameters.json
             cat parameters.json
       - continuation/continue:
           configuration_path: ./regressions_config.yml
