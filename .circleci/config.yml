@@ -1,113 +1,88 @@
 version: 2.1
+setup: true
 
-orbs: 
-  node: circleci/node@5.0.0
+parameters:
+  browser:
+    type: string
+    default: ${DEFAULT_BROWSER}
+  desktop:
+    type: string
+    default: "false"
+  parallelism:
+    description: "Number of containers to run in parallel"
+    type: integer
+    default: 10
+  run_accessibility:
+    type: boolean
+    default: false
+  run_deploy:
+    type: boolean
+    default: false
+  run_manual_build:
+    type: boolean
+    default: false
+  run_smokes:
+    type: boolean
+    default: false
+  target_env:
+    description: "Demo Environment to trigger the smoke tests against"
+    type: string
+    default: ${TARGET_ENV}
+  test_path:
+    description: "Path to test folder, or specific test file"
+    type: string
+    default: ./tests/**/*.js
 
-jobs: 
-#tier1
-  check-if-pr-is-ready:
-    executor: 
-      name: node/default
-    steps:
-      - run: 
-          command: | 
-            curl -s https://circleci.com/api/v1.1/project/gh/mapbox/mapbox-navigation-native/$CIRCLE_BUILD_NUM -H "Circle-Token: $CIRCLE_TOKEN" | jq ".status"
-            sleep 2
+orbs:
+  continuation: circleci/continuation@0.2.0
 
-  lint:
-    executor: 
-      name: node/default
+jobs:
+  generate-regressions-config:
+    executor: continuation/default
     steps:
+      - checkout
       - run: 
-          command: | 
-            curl -s https://circleci.com/api/v1.1/project/gh/mapbox/mapbox-navigation-native/$CIRCLE_BUILD_NUM -H "Circle-Token: $CIRCLE_TOKEN" | jq ".status"
-            sleep 2
-
-#tier2
-  static-analysis: 
-    executor: 
-      name: node/default
-    working_directory: ~/project
-    steps:
-      - run: 
-          command: | 
-            curl -s https://circleci.com/api/v1.1/project/gh/mapbox/mapbox-navigation-native/$CIRCLE_BUILD_NUM -H "Circle-Token: $CIRCLE_TOKEN" | jq ".status"
-            sleep 2          
-
-  linux: 
-    executor: 
-      name: node/default
-    steps:
-      - checkout   
-      - run: 
-          command: | 
-            sleep 2    
-      - run: 
-          command: | 
-            curl --request GET --url https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job --header 'Circle-Token: $CIRCLE_TOKEN' | jq > jobsInWorkflow.json
-            curl -s https://circleci.com/api/v1.1/project/gh/mapbox/mapbox-navigation-native/$CIRCLE_BUILD_NUM -H "Circle-Token: $CIRCLE_TOKEN" | jq ".status"
-            cat jobsInWorkflow.json
-      # - run: 
-      #     command: | 
-      #       curl -X POST --header "Content-Type: application/json" "https://circleci.com/api/v2/project/gh/jkzilla/circleci-demo-javascript-react-app/job/${CIRCLE_BUILD_NUM}/cancel?circle-token=${CIRCLE_TOKEN}" 
-      - persist_to_workspace:
-          root: .
-          paths:
-            - "*"
-  compute-high-level-metrics: 
-    executor: 
-      name: node/default
-    steps:
-      - run: 
-          command: | 
-            sleep 2
-            curl -s https://circleci.com/api/v1.1/project/gh/mapbox/mapbox-navigation-native/$CIRCLE_BUILD_NUM -H "Circle-Token: $CIRCLE_TOKEN" | jq ".status"
-            # curl -X POST --header "Content-Type: application/json" "https://circleci.com/api/v2/project/gh/jkzilla/circleci-demo-javascript-react-app/job/${CIRCLE_BUILD_NUM}/cancel?circle-token=${CIRCLE_TOKEN}" 
-  compute-low-level-metrics: 
-    executor: 
-      name: node/default
-    steps:
-      - attach_workspace:
-          at: .
-      - run: 
-          command: | 
-            pwd
-            ls
-            cat jobsInWorkflow.json
-            # cd ~/project
-            # cat jobsInWorkflow.json
-            sleep 2
-  build-template: 
-    executor: 
-      name: node/default
-    steps:
-      - run: 
-          command: | 
-            sleep 2
-      - run:
+          name: Generate Pipeline regressions_config.yml file
           command: |
-            curl -s https://circleci.com/api/v1.1/project/gh/mapbox/mapbox-navigation-native/$CIRCLE_BUILD_NUM -H "Circle-Token: $CIRCLE_TOKEN" | jq ".status"
-            curl -X POST --header "Content-Type: application/json" "https://circleci.com/api/v2/project/gh/jkzilla/circleci-demo-javascript-react-app/job/${CIRCLE_BUILD_NUM}/cancel?circle-token=${CIRCLE_TOKEN}" 
+            #The generate script has 2 arguments:
+            # 1) TARGET_ENVIRONMENT = String: environment to target
+            # 2) PARALLELISM = Int: the number of containers to use with a run
+            json=$(cat \<<EOD
+             { "browser": "<< pipeline.parameters.browser >>", "desktop": "<< pipeline.parameters.desktop >>", "run_manual_build": << pipeline.parameters.run_manual_build >>, "run_accessibility": << pipeline.parameters.run_accessibility >>, "test_path": "<< pipeline.parameters.test_path >>" }
+            EOD)
+            echo $json >> /home/circleci/params.json
 
+            .circleci/scripts/generate-pipeline-config.sh << pipeline.parameters.target_env >> << pipeline.parameters.parallelism >>
+      - run: cat /home/circleci/params.json
+      - continuation/continue:
+          configuration_path: "configs/regressions_config.yml"
+          parameters: /home/circleci/params.json
+
+  generate-smokes-config:
+    executor: continuation/default
+    steps:
+      - checkout
+      - run: 
+          name: Generate Pipeline smokes_config.yml file
+          command: |
+            #The generate script has 2 arguments:
+            # 1) TARGET_ENVIRONMENT = String: environment to target
+            # 2) PARALLELISM = Int: the number of containers to use with a run
+            json=$(cat \<<EOD
+             { "run_deploy": << pipeline.parameters.run_deploy >>, "test_path": "<< pipeline.parameters.test_path >>" }
+            EOD)
+            echo $json >> /home/circleci/params.json
+
+            .circleci/scripts/generate-smokes-config.sh << pipeline.parameters.target_env >> << pipeline.parameters.parallelism >>
+      - continuation/continue:
+          configuration_path: configs/smokes_config.yml
+          parameters: /home/circleci/params.json
 workflows:
-  default:
+  setup-regression_run:
+    unless: << pipeline.parameters.run_smokes >>
     jobs:
-      - check-if-pr-is-ready
-      - lint
-      - static-analysis:
-          requires: [ 'check-if-pr-is-ready' ]
-          context: 
-            - CIRCLE_TOKEN
-      - linux:
-          requires: [ 'check-if-pr-is-ready' ]
-      - compute-high-level-metrics:
-          requires: [ 'linux' ]
-          context: 
-            - CIRCLE_TOKEN
-      - compute-low-level-metrics:
-          requires:
-            - linux
-      - build-template:
-          requires: [ 'check-if-pr-is-ready' ]
-          context: 
-            - CIRCLE_TOKEN          
+      - generate-regressions-config
+  setup-smokes_run:
+    when: << pipeline.parameters.run_smokes >>
+    jobs:
+      - generate-smokes-config
