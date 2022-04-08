@@ -2,36 +2,13 @@ version: 2.1
 setup: true
 
 parameters:
-  browser:
-    type: string
-    default: chrome
-  desktop:
-    type: string
-    default: "false"
-  parallelism:
-    description: "Number of containers to run in parallel"
-    type: integer
-    default: 10
-  run_accessibility:
-    type: boolean
-    default: false
   run_deploy:
-    type: boolean
-    default: false
-  run_manual_build:
     type: boolean
     default: false
   run_smokes:
     type: boolean
-    default: false
-  target_env:
-    description: "Demo Environment to trigger the smoke tests against"
-    type: string
-    default: docker
-  test_path:
-    description: "Path to test folder, or specific test file"
-    type: string
-    default: "path"
+    default: true
+
 
 orbs:
   continuation: circleci/continuation@0.2.0
@@ -50,18 +27,22 @@ jobs:
           configuration_path: ./regressions_config.yml
           parameters: ./params.json
 
-  generate-smokes-config:
+  generate-regressions-config-job2:
     executor: continuation/default
     steps:
       - checkout
       - continuation/continue:
-          configuration_path: ./smokes_config.yml
+          configuration_path: ./regressions_config.yml
 workflows:
-  setup-regression_run:
+  Performance Action Timing SPEC:
     unless: << pipeline.parameters.run_smokes >>
     jobs:
       - generate-regressions-config
-  setup-smokes_run:
+  Performance Action Timing SPEC2:
     when: << pipeline.parameters.run_smokes >>
     jobs:
-      - generate-smokes-config
+      - generate-regressions-config
+  Performance Action Timing SPEC3:
+    when: << pipeline.parameters.run_smokes >>
+    jobs:
+      - generate-regressions-config-job2
