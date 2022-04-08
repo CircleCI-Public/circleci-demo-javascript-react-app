@@ -44,13 +44,13 @@ jobs:
       - run:
           name: Trying to set a dynamic pipeline var
           command: |
-            hash="a87joe90rqhidaids23" # just an example, hash will be generated based on more complex logic
+            run_deploy=<< pipeline.parameters.run_deploy >> # just an example, hash will be generated based on more complex logic
             touch parameters.json
-            echo '{ \"backend_hash\"":" \"$hash\" }' > parameters.json
+            echo '{ \"run_deploy\"":" \"$run_deploy\" }' > parameters.json
             cat parameters.json
       - continuation/continue:
           configuration_path: ./regressions_config.yml
-          parameters: 
+          parameters: ./parameters.json
 
   generate-smokes-config:
     executor: continuation/default
