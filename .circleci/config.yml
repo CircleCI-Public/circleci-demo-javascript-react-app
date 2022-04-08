@@ -44,7 +44,7 @@ jobs:
       - run:
           name: Trying to set a dynamic pipeline var
           command: |
-            jq --null-input --arg run_deploy << pipeline.parameters.run_deploy >> '{"run_deploy": $RUN_DEPLOY_VALUE}' >> params.json
+            jq --null-input --arg run_deploy << pipeline.parameters.run_deploy >> '{"run_deploy": $run_deploy}' >> params.json
             cat params.json
       - continuation/continue:
           configuration_path: ./regressions_config.yml
