@@ -42,7 +42,7 @@ jobs:
       - env_setup
       - run_regressions:
           command: | 
-            echo '<< parameters.desktop >>'
+            echo '<< pipeline.parameters.desktop >>'
       - upload_results
 
 workflows:
