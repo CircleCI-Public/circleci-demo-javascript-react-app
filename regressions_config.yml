@@ -1,9 +1,6 @@
 version: 2.1
 
 parameters:
-  browser:
-    type: string
-    default: ${DEFAULT_BROWSER}
   desktop:
     type: string
     default: "false"
@@ -45,7 +42,7 @@ jobs:
       - env_setup
       - run_regressions:
           command: | 
-            echo '<< parameters.browser >>'
+            echo '<< parameters.desktop >>'
       - upload_results
 
 workflows:
