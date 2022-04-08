@@ -4,7 +4,7 @@ setup: true
 parameters:
   browser:
     type: string
-    default: ${DEFAULT_BROWSER}
+    default: chrome
   desktop:
     type: string
     default: "false"
@@ -27,11 +27,11 @@ parameters:
   target_env:
     description: "Demo Environment to trigger the smoke tests against"
     type: string
-    default: ${TARGET_ENV}
+    default: docker
   test_path:
     description: "Path to test folder, or specific test file"
     type: string
-    default: ./tests/**/*.js
+    default: "path"
 
 orbs:
   continuation: circleci/continuation@0.2.0
@@ -44,14 +44,13 @@ jobs:
       - run:
           name: Trying to set a dynamic pipeline var
           command: |
+            
             echo 'export RUN_DEPLOY=<< pipeline.parameters.run_deploy >>' >> $BASH_ENV # just an example, hash will be generated based on more complex logic
-            echo ${RUN_DEPLOY}
-            touch parameters.json
-            echo '{"run_deploy": ${RUN_DEPLOY:NULL}}' 
+            jq --null-input --arg run_deploy "run_deploy_value" '{"run_deploy": $run_deploy}' >> params.json
             cat parameters.json
       - continuation/continue:
           configuration_path: ./regressions_config.yml
-          parameters: ./parameters.json
+          parameters: ./params.json
 
   generate-smokes-config:
     executor: continuation/default
