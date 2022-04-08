@@ -42,7 +42,7 @@ jobs:
     steps:
       - checkout 
       - continuation/continue:
-          configuration_path: "~/regressions_config.yml"
+          configuration_path: "regressions_config.yml"
 
   generate-smokes-config:
     executor: continuation/default
