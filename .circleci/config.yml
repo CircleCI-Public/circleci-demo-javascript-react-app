@@ -40,43 +40,16 @@ jobs:
   generate-regressions-config:
     executor: continuation/default
     steps:
-      - checkout
-      - run: 
-          name: Generate Pipeline regressions_config.yml file
-          command: |
-            #The generate script has 2 arguments:
-            # 1) TARGET_ENVIRONMENT = String: environment to target
-            # 2) PARALLELISM = Int: the number of containers to use with a run
-            json=$(cat \<<EOD
-             { "browser": "<< pipeline.parameters.browser >>", "desktop": "<< pipeline.parameters.desktop >>", "run_manual_build": << pipeline.parameters.run_manual_build >>, "run_accessibility": << pipeline.parameters.run_accessibility >>, "test_path": "<< pipeline.parameters.test_path >>" }
-            EOD)
-            echo $json >> /home/circleci/params.json
-
-            .circleci/scripts/generate-pipeline-config.sh << pipeline.parameters.target_env >> << pipeline.parameters.parallelism >>
-      - run: cat /home/circleci/params.json
+      - checkout 
       - continuation/continue:
           configuration_path: "configs/regressions_config.yml"
-          parameters: /home/circleci/params.json
 
   generate-smokes-config:
     executor: continuation/default
     steps:
       - checkout
-      - run: 
-          name: Generate Pipeline smokes_config.yml file
-          command: |
-            #The generate script has 2 arguments:
-            # 1) TARGET_ENVIRONMENT = String: environment to target
-            # 2) PARALLELISM = Int: the number of containers to use with a run
-            json=$(cat \<<EOD
-             { "run_deploy": << pipeline.parameters.run_deploy >>, "test_path": "<< pipeline.parameters.test_path >>" }
-            EOD)
-            echo $json >> /home/circleci/params.json
-
-            .circleci/scripts/generate-smokes-config.sh << pipeline.parameters.target_env >> << pipeline.parameters.parallelism >>
       - continuation/continue:
           configuration_path: configs/smokes_config.yml
-          parameters: /home/circleci/params.json
 workflows:
   setup-regression_run:
     unless: << pipeline.parameters.run_smokes >>
