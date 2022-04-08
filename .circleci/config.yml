@@ -44,8 +44,7 @@ jobs:
       - run:
           name: Trying to set a dynamic pipeline var
           command: |
-            run_deploy=<< pipeline.parameters.run_deploy >> # just an example, hash will be generated based on more complex logic
-            echo $run_deploy >> $BASH_ENV
+            echo 'export run_deploy=<< pipeline.parameters.run_deploy >>' >> $BASH_ENV' # just an example, hash will be generated based on more complex logic
             touch parameters.json
             echo '{"run_deploy": $run_deploy}' > parameters.json
             cat parameters.json
