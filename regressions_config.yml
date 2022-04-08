@@ -5,7 +5,6 @@ parameters:
     type: string
     default: "false"
 
-
 executors:
   docker_node:
     docker:
@@ -23,7 +22,6 @@ commands:
           key: v1-node-modules-{{ checksum "package-lock.json" }}
           paths: node_modules
 
-
   upload_results:
     description: "Upload any test artifacts"
     steps:
@@ -40,9 +38,9 @@ jobs:
     executor: docker_node
     steps:
       - env_setup
-      - run_regressions:
+      - run:
           command: | 
-            echo '<< pipeline.parameters.desktop >>'
+            echo << pipeline.parameters.desktop >>
       - upload_results
 
 workflows:
