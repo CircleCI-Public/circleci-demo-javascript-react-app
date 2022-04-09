@@ -9,7 +9,7 @@ jobs:
       - run: docker-compose --version
       - run: 
           command: |
-            pip3 remove docker-compose
+            pip3 uninstall docker-compose
             pip3 install docker-compose
       - run: docker-compose --version
   build-large:
