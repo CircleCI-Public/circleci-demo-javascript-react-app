@@ -7,10 +7,8 @@ jobs:
     steps:
       - run: uname -a
       - run: docker-compose --version
-      - run: 
-          command: |
-            sudo apt-get remove docker-compose
-            pip install docker-compose
+      - run: pip uninstall docker-compose   
+      - run: pip install docker-compose
       - run: docker-compose --version
   build-large:
     machine:
