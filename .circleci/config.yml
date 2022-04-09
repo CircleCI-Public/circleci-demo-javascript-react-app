@@ -7,8 +7,10 @@ jobs:
     steps:
       - run: uname -a
       - run: docker-compose --version
-      - run: pip uninstall docker-compose   
-      - run: pip install docker-compose
+      - run: 
+          command: |
+            curl -L https://github.com/linuxserver/docker-docker-compose/releases/download/v2-2.4.1-r0-ls1/docker-compose-armhf | sudo tee /usr/local/bin/docker-compose > /dev/null
+            ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
       - run: docker-compose --version
   build-large:
     machine:
