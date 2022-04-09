@@ -10,7 +10,8 @@ jobs:
       - run: 
           command: |
             sudo rm /usr/local/bin/docker-compose
-            curl -L https://github.com/linuxserver/docker-docker-compose/releases/download/v2-2.4.1-r0-ls1/docker-compose-armhf | sudo tee /usr/local/bin/docker-compose >/dev/null
+            curl -L https://github.com/linuxserver/docker-docker-compose/releases/download/v2-2.4.1-r0-ls1/docker-compose-armhf | sudo tee /usr/local/bin/docker-compose > /dev/null
+            chmod +x /usr/local/bin/docker-compose
       - run: docker-compose --version
   build-large:
     machine:
