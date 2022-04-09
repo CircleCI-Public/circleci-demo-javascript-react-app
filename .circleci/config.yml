@@ -2,14 +2,14 @@ version: 2.1
 jobs:
   build-arm-large:
     machine:
-      image: ubuntu-2004:202101-01
+      image: ubuntu-2004:current
     resource_class: arm.large
     steps:
       - run: uname -a
       - run: docker-compose --version
   build-large:
     machine:
-      image: ubuntu-2004:202101-01
+      image: ubuntu-2004:current
     resource_class: large
     steps:
       - run: uname -a
