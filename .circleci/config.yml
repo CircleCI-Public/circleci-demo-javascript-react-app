@@ -11,6 +11,9 @@ jobs:
     steps:
       - browser-tools/install-chrome: 
           chrome-version: 100.0.4896.60
+      - run:
+          command: |
+            which google-chrome
       
 workflows:
   build:
