@@ -1,26 +1,18 @@
 version: 2.1
+
+orbs: 
+  browser-tools: circleci/browser-tools@1.2.5
+  node: circleci/node@5.0.2
+
+
 jobs:
-  build-arm-large:
-    machine:
-      image: ubuntu-2004:current
-    resource_class: arm.large
+  test-browser-tools:
+    executor: node/default
     steps:
-      - run: uname -a
-      - run: docker-compose --version
-      - run: 
-          command: |
-            pip3 uninstall docker-compose
-            pip3 install docker-compose
-      - run: docker-compose --version
-  build-large:
-    machine:
-      image: ubuntu-2004:current
-    resource_class: large
-    steps:
-      - run: uname -a
-      - run: docker-compose --version
+      - browser-tools/install-chrome: 
+          chrome-version: 100.0.4896.60
+      
 workflows:
   build:
     jobs:
-      - build-arm-large
-      - build-large
+      - test-browser-tools
