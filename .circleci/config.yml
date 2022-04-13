@@ -1,21 +1,19 @@
 version: 2.1
 
-orbs: 
-  browser-tools: circleci/browser-tools@1.2.5
-  node: circleci/node@5.0.2
-
+workflows:
+  my-workflow:
+    jobs:
+      - run-tests:
+          context:
+            - org-global
+            - my-context
 
 jobs:
-  test-browser-tools:
-    executor: node/default
+  run-tests:
+    docker:
+      - image: cimg/base:2020.01
     steps:
-      - browser-tools/install-chrome: 
-          chrome-version: 100.0.4896.60
+      - checkout
       - run:
-          command: |
-            which google-chrome
-      
-workflows:
-  build:
-    jobs:
-      - test-browser-tools
+          name: "echo environment variables from org-global context"
+          command: echo $MY_ENV_VAR
