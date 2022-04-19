@@ -1,19 +1,9 @@
 version: 2.1
 
-workflows:
-  my-workflow:
-    jobs:
-      - run-tests:
-          context:
-            - org-global
-            - my-context
+orbs:
+    hello: circleci/hello-build@volatile
 
-jobs:
-  run-tests:
-    docker:
-      - image: cimg/base:2020.01
-    steps:
-      - checkout
-      - run:
-          name: "echo environment variables from org-global context"
-          command: echo $MY_ENV_VAR
+workflows:
+    "Hello Workflow":
+        jobs:
+          - hello/hello-build
