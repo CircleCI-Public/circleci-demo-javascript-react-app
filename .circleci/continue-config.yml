@@ -1,0 +1,10 @@
+version: 2.1
+
+setup: true
+
+orbs:
+    hello: circleci/hello-build@volatile
+workflows:
+    "Hello Workflow":
+        jobs:
+          - hello/hello-build
