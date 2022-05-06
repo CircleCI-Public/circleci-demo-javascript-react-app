@@ -79,7 +79,7 @@ jobs:
     parameters:
       executor:
         type: string  
-    executor: << parameters.executor >>
+    executor: linux-py
     steps:
       - browsers/install-browser-tools # todo
 
@@ -87,7 +87,4 @@ workflows:
   version: 2
   ctrlbuild:
     jobs:
-      - conda_pack_ctrldev:
-          matrix:
-            parameters:
-              executor: ["linux-py", "linux-py-machine", "mac-13", "win-2019"]
+      - conda_pack_ctrldev
