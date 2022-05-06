@@ -5,42 +5,89 @@ orbs:
   ruby: circleci/ruby@1.7.1
   browsers: circleci/browser-tools@1.3.0
 
-parameters:
-  r_class:
-    type: string
-    default: "small"
-  e2e_tests_workflow:
-    default: false
-    type: boolean
+executors:
+  linux-py:
+    docker:
+      - image: cimg/python:3.8.6
+    resource_class: small
+    # On linux the bash shell is non-interactive by default, and therefore
+    # doesn't get conda's "init bash"-provided config. Force it to be
+    # interactive (as it is by default on other platforms).
+    shell: bash -ieo pipefail
+    environment:
+      SCRATCH: /tmp/ctrl
+      WORKING_DIR: /tmp/workspace/src
+      LC_ALL: 'C.UTF-8'
+      LANG: 'C.UTF-8'
+      CTRL_LOG_LEVEL: 'DEBUG'
+      # the 3 below also have default values (applicable to Linux) defined
+      # in Project Settings -> Environment Variables
+      CONDA_LOCKFILE: 'lockfiles/dev/cpu/linux-64.lock'
+      MPLBACKEND: agg
+    working_directory: /tmp/workspace/src
+
+  linux-py-machine:
+    machine:
+      image: ubuntu-2004:202201-02
+    resource_class: medium
+    # On linux the bash shell is non-interactive by default, and therefore
+    # doesn't get conda's "init bash"-provided config. Force it to be
+    # interactive (as it is by default on other platforms).
+    shell: bash -ieo pipefail
+    environment:
+      SCRATCH: /tmp/ctrl
+      WORKING_DIR: /tmp/workspace/src
+      LC_ALL: 'C.UTF-8'
+      LANG: 'C.UTF-8'
+      CTRL_LOG_LEVEL: 'DEBUG'
+      CONDA_LOCKFILE: 'lockfiles/dev/cpu/linux-64.lock'
+    working_directory: /tmp/workspace/src
+
+  linux-base:
+    docker:
+      - image: cimg/base:2022.03
+    resource_class: small
+    shell: bash -ieo pipefail
+
+  win-2019:
+    description: |
+      Windows with Visual Studio 2019. Specialization of https://circleci.com/orbs/registry/orb/circleci/windows.
+    machine:
+      image: windows-server-2019-vs2019:stable
+      resource_class: windows.medium
+    shell: bash.exe -leo pipefail
+    environment:
+      SCRATCH: c:/tmp/ctrl
+      WORKING_DIR: c:/tmp/workspace/src
+      CTRL_LOG_LEVEL: 'DEBUG'
+      CONDA_LOCKFILE: 'lockfiles/dev/cpu/win-64.lock'
+    working_directory: c:/tmp/workspace/src
+
+  mac-13:
+    macos:
+      xcode: '13.3.0'
+    resource_class: macos.x86.medium.gen2
+    environment:
+      SCRATCH: /tmp/ctrl
+      WORKING_DIR: /tmp/workspace/src
+      CTRL_LOG_LEVEL: 'DEBUG'
+      CONDA_LOCKFILE: 'lockfiles/dev/cpu/osx-64.lock'
+    working_directory: /tmp/workspace/src
 
 jobs:
-  very-fun-time-build:
+  conda_pack_ctrldev:
     parameters:
-      test:
-        type: string
-        default: small
-      workflow_name:
-        type: string
-    machine:
-      image: ubuntu-2004:202010-01
+      executor:
+        type: string  
+    executor: << parameters.executor >>
     steps:
       - browsers/install-browser-tools # todo
 
 workflows:
-  main:
+  version: 2
+  ctrlbuild:
     jobs:
-      - very-fun-time-build:
-          name: test_name_but_different # same job different name
-          workflow_name: main 
-          test: small
-      - very-fun-time-build:
-          name: test_name # same job same name 
-          workflow_name: main
-          test: small
-  secondary:
-    when: << pipeline.parameters.e2e_tests_workflow >>
-    jobs:
-      - very-fun-time-build:
-          name: test_name # same job same name
-          workflow_name: secondary
-          test: small
+      - conda_pack_ctrldev:
+          matrix:
+            parameters:
+              executor: ["linux-py", "linux-py-machine", "mac-13", "win-2019"]
