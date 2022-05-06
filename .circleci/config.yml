@@ -1,16 +1,46 @@
 version: 2.1
 
-setup: true
 orbs:
-    hello: circleci/hello-build@volatile
-    path-filtering: circleci/path-filtering@0.1.2
+  macos: circleci/macos@2.1.0
+  ruby: circleci/ruby@1.7.1
+  browsers: circleci/browser-tools@1.3.0
+
+parameters:
+  r_class:
+    type: string
+    default: "small"
+  e2e_tests_workflow:
+    default: false
+    type: boolean
+
+jobs:
+  very-fun-time-build:
+    parameters:
+      test:
+        type: string
+        default: small
+      workflow_name:
+        type: string
+    machine:
+      image: ubuntu-2004:202010-01
+    steps:
+      - browsers/install-browser-tools # todo
+
 workflows:
-    "Hello Workflow":
-        jobs:
-          - hello/hello-build
-          - path-filtering/filter:
-              base-revision: main
-              config-path: .circleci/continue-config.yml
-              mapping: |
-                src/.* build-code true
-                doc/.* build-docs true
+  main:
+    jobs:
+      - very-fun-time-build:
+          name: test_name_but_different # same job different name
+          workflow_name: main 
+          test: small
+      - very-fun-time-build:
+          name: test_name # same job same name 
+          workflow_name: main
+          test: small
+  secondary:
+    when: << pipeline.parameters.e2e_tests_workflow >>
+    jobs:
+      - very-fun-time-build:
+          name: test_name # same job same name
+          workflow_name: secondary
+          test: small
