@@ -75,8 +75,9 @@ executors:
     working_directory: /tmp/workspace/src
 
 jobs:
-  conda_pack_ctrldev:
-    executor: linux-py-machine
+  conda_pack_ctrldev: 
+    machine:
+      image: ubuntu-2004:202201-02  
     steps:
       - browsers/install-browser-tools # todo
 
