@@ -76,10 +76,7 @@ executors:
 
 jobs:
   conda_pack_ctrldev:
-    parameters:
-      executor:
-        type: string  
-    executor: linux-py
+    executor: linux-py-machine
     steps:
       - browsers/install-browser-tools # todo
 
