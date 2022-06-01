@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import './App.css';
 
-import Layout from './Componets/Layout';
-import Header from './Componets/Header';
-import Container from './Componets/Container';
-import Card from './Componets/Card';
+import Layout from './Components/Layout';
+import Header from './Components/Header';
+import Container from './Components/Container';
+import Card from './Components/Card';
 
 
 class App extends Component {
