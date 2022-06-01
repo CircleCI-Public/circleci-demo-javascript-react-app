@@ -1,7 +1,10 @@
 version: 2.1
+
 orbs:
-  node: circleci/node@4.7.0
+  node: circleci/node@5.0.2
   heroku: circleci/heroku@1.2.6
+
+setup: true
 
 jobs:
   build_and_test:
@@ -63,3 +66,19 @@ workflows:
       #     filters:
       #       branches:
       #         only: master # only deploy when on main/master
+
+  checking-branch:
+    <<: *default-executor
+    steps:
+      - checkout
+      - run: 
+          command: |
+            if [ << pipeline.git.branch >> != "main" ]; then
+              exit 1
+            fi
+      - continuation/continue:
+          configuration_path: config2.yml  
+workflows:
+  run-if-main:
+    jobs:
+      - checking-branch
