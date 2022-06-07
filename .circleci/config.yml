@@ -1,25 +1,46 @@
 version: 2.1
-
 orbs:
   node: circleci/node@5.0.2
-  continuation: circleci/continuation@0.3.1
-
-setup: true
+  heroku: circleci/heroku@1.2.6
 
 jobs:
-  checking-branch:
+  build_and_test:
     executor: node/default
     steps:
       - checkout
-      - run: 
-          command: |
-            if [ << pipeline.git.branch >> != "main" ]; then
-              exit 1
-            fi
-      - continuation/continue:
-          configuration_path: config2.yml  
+      - node/install-packages:
+          pkg-manager: yarn
+          cache-path: ~/project/node_modules
+          override-ci-command: npm install
+      - run:
+          command: yarn test
+          name: Run tests
+      - run:
+          command: yarn build
+          name: Build app
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - .
+  deploy: # this can be any name you choose
+    docker:
+      - image: cimg/node:17.2.0
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - heroku/deploy-via-git: 
+          force: true # force push when pushing to the heroku remote, see: https://devcenter.heroku.com/articles/git
 
 workflows:
-  run-if-main:
+  on_commit:
     jobs:
-      - checking-branch
+      - build_and_test
+      # Follow instructions here to authenticate git for Heroku: https://devcenter.heroku.com/articles/git#http-git-authentication
+      # The following code may be uncommented, onnce HEROKU_API_KEY & HEROKU_APP_NAME environemnt variables are present
+      # Read more: https://circleci.com/docs/2.0/env-vars/
+      # - deploy:
+      #     requires:
+      #       - build_and_test # only deploy if the build_and_test job has completed
+      #     filters:
+      #       branches:
+      #         only: master # only deploy when on main/master
