@@ -10,6 +10,8 @@ jobs:
       - checkout
       - node/install-packages:
           pkg-manager: yarn
+          cache-path: ~/project/node_modules
+          override-ci-command: npm install
       - run:
           command: yarn test
           name: Run tests
