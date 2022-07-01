@@ -42,7 +42,7 @@ workflows:
             ignore: /.*/
   # This only runs on deploy tags and not branches https://discuss.circleci.com/t/how-to-force-run-a-periodic-workflow/28647/3
   tagged-build:
-    when: << pipeline.parameter.gitTag >>
+    when: << pipeline.parameter.run_git_tag >>
     jobs:
       - default_tests
       - default_build_and_deploy:
