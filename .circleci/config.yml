@@ -45,7 +45,7 @@ workflows:
     when: << pipeline.parameter.gitTag >>
     jobs:
       - default_tests
-      - default_build_and_deploy
+      - default_build_and_deploy:
           requires:
             - default_tests
             
