@@ -10,6 +10,8 @@ jobs:
       - run: 
           name: Run Build Command
           command: echo "I am building and testing"
+      - run:
+          name: List directories
           command: ls -al
 
   deploy: #name of job
@@ -21,8 +23,12 @@ jobs:
       - run: 
           name: Run Build Command
           command: echo "I am building and testing"
-          command: cd 
-          command: ls -la
+      - run:
+          name: Change Directory
+          command: cd
+      - run:
+          name: Checking working directory
+          command: pwd
 
 workflows:
   commit-workflow: # Name of workflow
