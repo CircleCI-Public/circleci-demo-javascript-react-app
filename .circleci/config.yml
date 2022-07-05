@@ -34,6 +34,7 @@ workflows:
   commit-workflow: # Name of workflow
     jobs: #within the workflow define the jobs you would like to run
      - build
+     - deploy
   schedule-workflow:
     triggers: #what triggers the workflow
       - schedule: #workflow triggers are scheduled
@@ -41,7 +42,7 @@ workflows:
           filters: #filter workflow schedule to trigger on master branch only
             branches:
               only: 
-                - master
+                - main
     jobs:
       - build
       - deploy
