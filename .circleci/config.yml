@@ -7,8 +7,8 @@ jobs:
     steps:
       - checkout
       - run: 
-          name: Install Depencies
-          command: npm install
+          name: Install Dependencies
+          command: npm install --force
       - run:
           name: Run Test
           command: npm run test
