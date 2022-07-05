@@ -1,10 +1,5 @@
 version 2.1
 
-workflows:
-  test-deploy: # Name of workflow
-    jobs: #within the workflow define the jobs you would like to run
-     - test
-
 jobs:
   test: #name of job
     docker:
@@ -12,3 +7,10 @@ jobs:
     steps:
       - checkout
       - run: node --version
+
+workflows:
+  test-deploy: # Name of workflow
+    jobs: #within the workflow define the jobs you would like to run
+     - test
+
+
