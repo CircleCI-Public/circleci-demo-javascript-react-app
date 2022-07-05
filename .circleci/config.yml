@@ -6,7 +6,12 @@ jobs:
       - image: cimg/node:18.4.0 #executor image from circlci 
     steps:
       - checkout
-      - run: node --version
+      - run: 
+          name: Install Depencies
+          command: npm install
+      - run:
+          name: Run Test
+          command: npm run test
 
 workflows:
   test-deploy: # Name of workflow
