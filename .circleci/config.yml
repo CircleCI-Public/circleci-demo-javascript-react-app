@@ -1,50 +1,25 @@
 version: 2.1
 
-jobs:
-  build: #name of job
-    docker:
-      - image: cimg/node:18.4.0 #executor image from circlci 
-    working_directory: ~/circleci-demo-schedule
-    steps:
-      - checkout
-      - run: 
-          name: Run Build Command
-          command: echo "I am building and testing"
-      - run:
-          name: List directories
-          command: ls -al
+description: |
+  Push git commits to origin using the --atomic option
+parameters:
+  branch:
+    default: development
+    description: Name of the branch to push to origin
+    type: string
+steps:
+  - run:
+      command: |
+        GitPush() {
+            git push --tags --atomic --set-upstream origin "${PARAM_BRANCH}"
+        }
 
-  deploy: #name of job
-    docker:
-      - image: cimg/node:18.4.0 #executor image from circlci 
-    working_directory: ~/circleci-demo-schedule
-    steps:
-      - checkout
-      - run: 
-          name: Run Build Command
-          command: echo "I am building and testing"
-      - run:
-          name: Change Directory
-          command: cd
-      - run:
-          name: Checking working directory
-          command: pwd
-
-workflows:
-  commit-workflow: # Name of workflow
-    jobs: #within the workflow define the jobs you would like to run
-     - build
-     - deploy
-  schedule-workflow:
-    triggers: #what triggers the workflow
-      - schedule: #workflow triggers are scheduled
-          cron: "0 * * * *" #what every hour
-          filters: #filter workflow schedule to trigger on master branch only
-            branches:
-              only: 
-                - main
-    jobs:
-      - build
-      - deploy
-
-
+        # Will not run if sourced for bats-core tests.
+        # View src/tests for more information.
+        ORB_TEST_ENV="bats-core"
+        if [ "${0#*$ORB_TEST_ENV}" == "$0" ]; then
+            GitPush
+        fi
+      environment:
+        PARAM_BRANCH: << parameters.branch >>
+      name: Push git commit to origin
