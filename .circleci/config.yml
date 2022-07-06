@@ -73,10 +73,8 @@ jobs:
           RAILS_ENV: production
           NODE_ENV: production
     resource_class: large
-    working_directory: ~/stackblitz/rails
     steps:
-      - checkout:
-          path: ~/stackblitz
+      - checkout
       - run:
           name: Install python, pip, and the AWS EB CLI
           command: |
@@ -172,8 +170,8 @@ jobs:
     docker:
       - image: cimg/base:current
     steps:
-      - gcp-gcr/gcr-auth:
-          registry-url: gcr.io,us-west1-docker.pkg.dev
+      # - gcp-gcr/gcr-auth:
+      #     registry-url: gcr.io,us-west1-docker.pkg.dev
       - checkout
       - setup_remote_docker:
           version: 20.10.11
@@ -191,11 +189,11 @@ jobs:
       - run:
           name: 'Docker build (buildx)'
           no_output_timeout: '20m'
-          environment:
-            IMAGE_NAME: gcr.io/stackblitz-images/stackblitz
-            CACHE_IMAGE_NAME: us-west1-docker.pkg.dev/stackblitz-images/stackblitz/build-cache
-            PARENT_BRANCH_TAG: master
-            ENGINEBLOCK_VERSION: 2aef224a91983a0ffc5e1cf1d248c8f233fe8c5e
+          # environment:
+          #   IMAGE_NAME: gcr.io/stackblitz-images/stackblitz
+          #   CACHE_IMAGE_NAME: us-west1-docker.pkg.dev/stackblitz-images/stackblitz/build-cache
+          #   PARENT_BRANCH_TAG: master
+          #   ENGINEBLOCK_VERSION: 2aef224a91983a0ffc5e1cf1d248c8f233fe8c5e
           command: |-
             mkdir -p /tmp/build
             docker buildx build \
@@ -334,7 +332,7 @@ workflows:
       #         only:
       #           - master
       #           - enterprise-stable
-      - build-and-push-eb
+      - build-and-push-ee
       #     requires:
       #       - nx-test
       #       - rails-node-test
