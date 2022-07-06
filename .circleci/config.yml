@@ -31,6 +31,62 @@ orbs:
           paths:
             - project
 
+  Version Check:
+    docker:
+      - image: cimg/python:3.8
+    steps:
+      - attach_workspace:
+          name: Restore environment
+          at: /home/circleci
+      - run:
+          name: Ensure all version strings match
+          command: |
+            pip install -r ci_requirements.txt
+            if bumpversion --dry-run minor ; then
+                echo "All version strings are in sync"
+            else
+                echo
+                echo "Not all version strings match. Please use the command below when manually bumping the version."
+                echo
+                echo "    bumpversion minor"
+                exit 1
+            fi
+ 
+      - when:
+          condition:
+            and:
+              - matches: { pattern: "^https://github.com/navhealth/.*", value: << pipeline.project.git_url >> }
+          steps:
+            - version/configure-git
+            - mem/recall:
+                env_var: REPO_VERSION
+            - run:
+                name: Get version in next branch
+                command: |
+                  git fetch origin master
+                  git checkout master
+                  NEXT_VERSION=$(cat config.ini | sed -n 2p | cut -d' ' -f 3)
+                  echo "export NEXT_VERSION=${NEXT_VERSION}" >> $BASH_ENV
+                  echo "${NEXT_VERSION} found in master branch"
+                  echo "${REPO_VERSION} found in ${CIRCLE_BRANCH} branch"
+                  git checkout ${CIRCLE_BRANCH}
+            - run:
+                name: Ensure version in the current branch has been bumped
+                command: |
+                  NEXT_VERSION_MINOR=$(echo ${NEXT_VERSION} | cut -d . -f 2)
+                  CURRENT_VERSION_MINOR=$(echo ${REPO_VERSION} | cut -d . -f 2)
+                  if [ ${NEXT_VERSION_MINOR} -ge ${CURRENT_VERSION_MINOR} ]; then
+                    echo "The MINOR version in \"config.ini\" must be greater than what is in the \"master\" branch."
+                    echo "Version in config.ini file: ${REPO_VERSION}"
+                    echo "Version in master: ${NEXT_VERSION}"
+                    exit 1
+                  fi
+      - persist_to_workspace:
+          name: Save environment
+          root: /home/circleci/
+          paths:
+            - project
+
 # our defined job, and its steps
 jobs:
   Environment Setup:
@@ -52,3 +108,10 @@ workflows:
   test:
     jobs:
       - Environment Setup
+      - Version Check:
+          filters:
+            branches:
+              only:
+                - development
+          requires:
+            - Environment Setup
