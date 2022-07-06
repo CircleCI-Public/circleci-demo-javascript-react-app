@@ -16,6 +16,8 @@ orbs:
   python: circleci/python@2
 
 
+# our defined job, and its steps
+jobs:
   Environment Setup:
     docker:
       - image: cimg/base:stable
@@ -30,6 +32,7 @@ orbs:
           root: /home/circleci/
           paths:
             - project
+            
 
   Version Check:
     docker:
@@ -81,23 +84,6 @@ orbs:
                     echo "Version in master: ${NEXT_VERSION}"
                     exit 1
                   fi
-      - persist_to_workspace:
-          name: Save environment
-          root: /home/circleci/
-          paths:
-            - project
-
-# our defined job, and its steps
-jobs:
-  Environment Setup:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - checkout
-      - yq/install
-      - mem/remember:
-          env_var: REPO_VERSION
-          value: $(cat config.ini | sed -n 2p | cut -d' ' -f 3)
       - persist_to_workspace:
           name: Save environment
           root: /home/circleci/
