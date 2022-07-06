@@ -38,8 +38,3 @@ commands:
           #command: <<include(scripts/configure-git.sh)>>
 
 
-
-workflows:
-  test:
-    jobs:
-      - Environment Setup
