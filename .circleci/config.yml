@@ -41,5 +41,5 @@ commands:
 
 workflows:
   Git Configure:
-    commands:
+    jobs:
       - gitconfigure
