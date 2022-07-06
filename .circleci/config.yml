@@ -6,7 +6,7 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
-      - mem/remember:
+      - rememborb/remember:
           env_var: REPO_VERSION
           value: 'super_cool_image:1.0.$CIRCLE_BUILD_NUM-$CIRCLE_SHA'
       #- run: docker build -t $IMAGE_TAG .
@@ -15,7 +15,7 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
-      - mem/recall:
+      - rememborb/recall:
           env_var: REPO_VERSION
       - run: echo $REPO_VERSION
       #- run: docker run $IMAGE_TAG test_coolness
@@ -23,7 +23,7 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
-      - mem/recall:
+      - rememborb/recall:
           env_var: REPO_VERSION
       - run: echo $REPO_VERSION
       - run: echo "This is the env repo:" $IMAGE_TAG
