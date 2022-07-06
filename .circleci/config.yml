@@ -1,45 +1,39 @@
 version: 2.1
-
 orbs:
-  docker: circleci/docker@2.0.5
-  aws-ecr: circleci/aws-ecr@7
-  aws-cli: circleci/aws-cli@2
-  version: carejourney/versionv2@1
-  slack: circleci/slack@4.4.4
-  jq: circleci/jq@2
-  helm: circleci/helm@1
-  kubernetes: circleci/kubernetes@1
-  gh: circleci/github-cli@2
-  pip: carejourney/pip-config@1
-  mem: circleci/rememborb@0.0.2
-  yq: carejourney/yq@1
-  python: circleci/python@2
-
-
-commands:
-  gitconfigure:
-    description: "Configure git to commit"
-    parameters:
-      email_address:
-        type: string
-        default: "sam01983@carejourney.com"
-        description: "Email address of the git user"
-      user_name:
-        type: string
-        default: "Sam Akpan"
-        description: "Name of the git user"
+  mem: circleci/rememborb@x.y.z
+jobs:
+  publish_image:
+    docker:
+      - image: 'circleci/python:3.7'
     steps:
-      - run:
-          environment:
-            PARAM_EMAIL_ADDRESS: <<parameters.email_address>>
-            PARAM_USER_NAME: <<parameters.user_name>>
-          name: Configure Git
-          command: pwd
-          #command: <<include(scripts/configure-git.sh)>>
-
-
-
+      - mem/remember:
+          env_var: IMAGE_TAG
+          value: 'super_cool_image:1.0.$CIRCLE_BUILD_NUM-$CIRCLE_SHA'
+      - run: docker build -t $IMAGE_TAG .
+      - run: docker push $IMAGE_TAG
+  test_image:
+    docker:
+      - image: 'circleci/python:3.7'
+    steps:
+      - mem/recall:
+          env_var: IMAGE_TAG
+      - run: docker pull $IMAGE_TAG
+      - run: docker run $IMAGE_TAG test_coolness
+  deploy_image:
+    docker:
+      - image: 'circleci/python:3.7'
+    steps:
+      - mem/recall:
+          env_var: IMAGE_TAG
+      - run: docker pull $IMAGE_TAG
+      - run: some_kubernetes_shenanigans $IMAGE_TAG
 workflows:
-  Git Configure:
+  highly_fault_tolerant_delivery:
     jobs:
-      - gitconfigure
+      - publish_image
+      - test_image:
+          requires:
+            - publish_image
+      - deploy_image:
+          requires:
+            - test_image
