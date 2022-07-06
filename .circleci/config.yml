@@ -320,37 +320,37 @@ workflows:
   test-build-and-push:
     unless: << pipeline.parameters.slack_trigger >>
     jobs:
-      - nx-test
-      - rails-node-test
-      - rails-test:
-          context: stackblitz-rails-test
-      - build-and-push-ee:
-          requires:
-            - nx-test
-            - rails-node-test
-            - rails-test
-          filters:
-            branches:
-              only:
-                - master
-                - enterprise-stable
-      - build-and-push-eb:
-          requires:
-            - nx-test
-            - rails-node-test
-            - rails-test
-          filters:
-            branches:
-              only:
-                - master
-      - update-ee-kots-repo:
-          requires:
-            - build-and-push-ee
-          context: replicated-kots
-          filters:
-            branches:
-              only:
-                - enterprise-stable
+      # - nx-test
+      # - rails-node-test
+      # - rails-test:
+      #     context: stackblitz-rails-test
+      # - build-and-push-ee:
+      #     requires:
+      #       - nx-test
+      #       - rails-node-test
+      #       - rails-test
+      #     filters:
+      #       branches:
+      #         only:
+      #           - master
+      #           - enterprise-stable
+      - build-and-push-eb
+      #     requires:
+      #       - nx-test
+      #       - rails-node-test
+      #       - rails-test
+      #     filters:
+      #       branches:
+      #         only:
+      #           - master
+      # - update-ee-kots-repo:
+      #     requires:
+      #       - build-and-push-ee
+      #     context: replicated-kots
+      #     filters:
+      #       branches:
+      #         only:
+      #           - enterprise-stable
 
   build-and-push-eb-slack:
     when:
