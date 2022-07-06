@@ -16,159 +16,30 @@ orbs:
   python: circleci/python@2
 
 
-# our defined job, and its steps
-jobs:
-  Environment Setup:
-    docker:
-      - image: cimg/base:stable
+commands:
+  sayhello:
+    description: "Configure git to commit"
+    parameters:
+      email_address:
+        type: string
+        default: "sam01983@carejourney.com"
+        description: "Email address of the git user"
+      user_name:
+        type: string
+        default: "Sam Akpan"
+        description: "Name of the git user"
     steps:
-      - checkout
-      - yq/install
-      - mem/remember:
-          env_var: REPO_VERSION
-          value: $(cat config.ini | sed -n 2p | cut -d' ' -f 3)
-      - persist_to_workspace:
-          name: Save environment
-          root: /home/circleci/
-          paths:
-            - project
-            
-  Version Check:
-    docker:
-      - image: cimg/python:3.8
-    steps:
-      - attach_workspace:
-          name: Restore environment
-          at: /home/circleci
-      - run:
-          name: Ensure all version strings match
-          command: |
-            pip install -r ci_requirements.txt
-            if bumpversion --dry-run minor ; then
-                echo "All version strings are in sync"
-            else
-                echo
-                echo "Not all version strings match. Please use the command below when manually bumping the version."
-                echo
-                echo "    bumpversion minor"
-                exit 1
-            fi
- 
-      - when:
-          condition:
-            and:
-              - matches: { pattern: "^https://github.com/sam01983/.*", value: << pipeline.project.git_url >> }
-          steps:
-            - version/configure-git
-            - mem/recall:
-                env_var: REPO_VERSION
-            - run:
-                name: Get version in next branch
-                command: |
-                  git fetch origin master
-                  git checkout master
-                  NEXT_VERSION=$(cat config.ini | sed -n 2p | cut -d' ' -f 3)
-                  echo "export NEXT_VERSION=${NEXT_VERSION}" >> $BASH_ENV
-                  echo "${NEXT_VERSION} found in master branch"
-                  echo "${REPO_VERSION} found in ${CIRCLE_BRANCH} branch"
-                  git checkout ${CIRCLE_BRANCH}
-            - run:
-                name: Ensure version in the current branch has been bumped
-                command: |
-                  NEXT_VERSION_MINOR=$(echo ${NEXT_VERSION} | cut -d . -f 2)
-                  CURRENT_VERSION_MINOR=$(echo ${REPO_VERSION} | cut -d . -f 2)
-                  if [ ${NEXT_VERSION_MINOR} -ge ${CURRENT_VERSION_MINOR} ]; then
-                    echo "The MINOR version in \"config.ini\" must be greater than what is in the \"master\" branch."
-                    echo "Version in config.ini file: ${REPO_VERSION}"
-                    echo "Version in master: ${NEXT_VERSION}"
-                    exit 1
-                  fi
-      - persist_to_workspace:
-          name: Save environment
-          root: /home/circleci/
-          paths:
-            - project
+      - run:
+          environment:
+            PARAM_EMAIL_ADDRESS: <<parameters.email_address>>
+            PARAM_USER_NAME: <<parameters.user_name>>
+          name: Configure Git
+          command: pwd
+          #command: <<include(scripts/configure-git.sh)>>
 
-  Commit Changes:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - attach_workspace:
-          name: Restore environment
-          at: /home/circleci
-      - version/configure-git
-      - mem/recall:
-          env_var: REPO_VERSION
-      - run:
-          name: Verify Environment Variable GITHUB_TOKEN
-          command: |
-            if [[ -z "${GITHUB_TOKEN}" ]]; then
-              echo "ERROR: Missing environment variable {GITHUB_TOKEN}" >&2
-              exit 1
-            fi
-      - run:
-          name: Commit changes
-          command: |
-            git commit -a -m "[skip ci] Deploy ${REPO_VERSION}"
-            
-      - when: # Add git tag for production releases
-          condition:
-            and:
-              - equal: [ master, << pipeline.git.branch >> ]
-              - matches: { pattern: "^https://github.com/sam01983/.*", value: << pipeline.project.git_url >> }
-          steps:
-            - run:
-               name: Tag Current Version
-               command: |
-                  git tag ${REPO_VERSION}
-                  git push origin ${REPO_VERSION}
-      - when: # Only push git commit for sam01983 pipelines
-            condition:
-              and:
-                - matches: { pattern: "^https://github.com/sam01983/.*", value: << pipeline.project.git_url >> }
-                - equal: [ master, << pipeline.git.branch >> ]
-            steps:
-              - version/git-push:
-                  branch: master:development
-      - when: # Only push git commit for sam01983 pipelines
-            condition:
-              and:
-                - matches: { pattern: "^https://github.com/sam01983/.*", value: << pipeline.project.git_url >> }
-                - equal: [ development, << pipeline.git.branch >> ]
-            steps:
-              - version/git-push:
-                  branch: << pipeline.git.branch >>
-              - gh/setup
-              - run:
-                  name: Submit "ready-to-merge" build status for version bump commit
-                  command: |
-                    COMMIT_HASH=$(git rev-parse HEAD)
-                    gh api repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/statuses/${COMMIT_HASH} \
-                      -X POST -H "Accept: application/vnd.github.v3+json" \
-                      -F state=success \
-                      -F context=ready-to-merge \
-                      -F "description=Bump version has been bumped and pushed to GitHub." \
-                      -f target_url=${CIRCLE_BUILD_URL}
 
 
 workflows:
   test:
     jobs:
       - Environment Setup
-      - Version Check:
-          filters:
-            branches:
-              only:
-                - development
-          requires:
-            - Environment Setup
-      - Commit Changes:
-          pre-steps:
-            - add_ssh_keys:
-                fingerprints:
-                  - 70:e7:98:0a:bd:99:bf:d2:f8:75:6b:73:47:4a:ea:b6
-          requires:
-            - Dev Airflow Health Checks
-            - Int Airflow Health Checks
-            - Tst Airflow Health Checks
-            - Prod Airflow Health Checks
