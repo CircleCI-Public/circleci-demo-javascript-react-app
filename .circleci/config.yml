@@ -1,51 +1,384 @@
 version: 2.1
+orbs:
+  docker: circleci/docker@2.0.3
+  gcp-gcr: circleci/gcp-gcr@0.14.1
+  node: circleci/node@4.7.0
+  github-cli: circleci/github-cli@2.0.0
+  slack: circleci/slack@4.7.0
+jobs:
+  nx-test:
+    docker:
+      - image: cimg/node:16.13.2
+        environment:
+          NODE_ENV: test
+    working_directory: ~/project/nx
+    steps:
+      - checkout:
+          path: ~/project
+      - node/install-packages
+      - run: npm run typecheck
+      - run: npm run test
 
-only-deploy-tags: &only-deploy-tags
-  filters:
-    tags:
-      only: /.*/
-    branches:
-      ignore: /.*/
+  rails-node-test:
+    docker:
+      - image: cimg/node:16.13.2
+        environment:
+          NODE_ENV: test
+    working_directory: ~/project/rails
+    steps:
+      - checkout:
+          path: ~/project
+      - node/install-packages
+      - run: npm run typecheck
+      - run: npm run prettier
+      - run: npm run betterer:ci
+      - run: npm run test
+
+  rails-test:
+    docker:
+      - image: cimg/ruby:2.6.9-node
+        environment:
+          SECRET_KEY_BASE: blank
+          RAILS_ENV: test
+          DATABASE_URL: postgresql://postgres:test@localhost:5432
+      - image: postgres:13
+        environment:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: stackblitz_test
+          POSTGRES_PASSWORD: test
+    working_directory: /mnt/ramdisk/rails
+    steps:
+      - checkout:
+          path: /mnt/ramdisk
+      - restore_cache:
+          keys:
+            - test-gem-cache-v3-{{ arch }}-{{ .Branch }}-{{ checksum "Gemfile.lock" }}
+            - test-gem-cache-v3-{{ arch }}-{{ .Branch }}
+            - test-gem-cache-v3
+      - run: gem install bundler:1.17.2
+      - run: bundle install --path vendor/bundle
+      - save_cache:
+          key: test-gem-cache-v3-{{ arch }}-{{ .Branch }}-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
+      - run: bundle exec rubocop
+      - run: bundle exec rails db:test:prepare
+      - run: bundle exec rspec
+
+  build-and-push-eb:
+    docker:
+      - image: cimg/ruby:2.6.9-node
+        environment:
+          SECRET_KEY_BASE: blank
+          RAILS_ENV: production
+          NODE_ENV: production
+    resource_class: large
+    working_directory: ~/stackblitz/rails
+    steps:
+      - checkout:
+          path: ~/stackblitz
+      - run:
+          name: Install python, pip, and the AWS EB CLI
+          command: |
+            sudo apt-get update
+            sudo apt-get install python3-pip
+            pip3 install awsebcli
+      - restore_cache:
+          keys:
+            - prod-gem-cache-v3-{{ arch }}-{{ .Branch }}-{{ checksum "Gemfile.lock" }}
+            - prod-gem-cache-v3-{{ arch }}-{{ .Branch }}
+            - prod-gem-cache-v3
+      - run: gem install bundler:1.17.2
+      - run: bundle install --without development test --path vendor/bundle
+      - save_cache:
+          key: prod-gem-cache-v3-{{ arch }}-{{ .Branch }}-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
+      - restore_cache:
+          keys:
+            - asset-cache-v3-{{ arch }}-{{ .Branch }}-{{ .Environment.CIRCLE_SHA1 }}
+            - asset-cache-v3-{{ arch }}-{{ .Branch }}
+            - asset-cache-v3
+      - run:
+          name: Install npm dependencies
+          command: npm ci
+          no_output_timeout: 5m
+      - run:
+          name: Build webpack assets
+          command: NODE_OPTIONS='--max-old-space-size=4096' npm run webpack:build
+          no_output_timeout: 10m
+      - run:
+          name: rake assets:precompile
+          command: bundle exec rake assets:precompile
+          no_output_timeout: 10m
+      - save_cache:
+          key: asset-cache-v3-{{ arch }}-{{ .Branch }}-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - public/assets
+            - tmp/cache/assets
+            - tmp/cache/image_optim
+      - run:
+          name: Add app revision for AppSignal
+          command: 'awk "1; NR == 3 { print \"  revision: ${CIRCLE_SHA1}\" }" ./config/appsignal.yml > ./config/appsignal.tmp.yml && mv ./config/appsignal.tmp.yml  ./config/appsignal.yml'
+      - run:
+          name: Stage asset manifests
+          command: git add public/assets config/appsignal.yml && git status
+      - unless:
+          condition: << pipeline.parameters.slack_trigger >>
+          steps:
+            - run:
+                name: Deploy to ElasticBeanstalk
+                command: eb deploy --staged --timeout 20
+                no_output_timeout: 15m
+      - when:
+          condition: << pipeline.parameters.slack_trigger >>
+          steps:
+            - run:
+                name: Deploy to ElasticBeanstalk
+                command: eb deploy stackblitz-staging --staged --timeout 20
+                no_output_timeout: 15m
+            - slack/notify:
+                event: fail
+                mentions: << pipeline.parameters.mentions >>
+                custom: |
+                  {
+                    "blocks": [
+                      {
+                        "type": "section",
+                        "text": {
+                          "type": "mrkdwn",
+                          "text": "$SLACK_PARAM_MENTIONS's deploy of `$CIRCLE_BRANCH` to Jacob failed :frowning:"
+                        }
+                      }
+                    ]
+                  }
+            - slack/notify:
+                event: pass
+                mentions: << pipeline.parameters.mentions >>
+                custom: |
+                  {
+                    "blocks": [
+                      {
+                        "type": "section",
+                        "text": {
+                          "type": "mrkdwn",
+                          "text": "$SLACK_PARAM_MENTIONS's deploy of `$CIRCLE_BRANCH` to Jacob completed :white_check_mark:"
+                        }
+                      }
+                    ]
+                  }
+
+  build-and-push-ee:
+    docker:
+      - image: cimg/base:current
+    steps:
+      - gcp-gcr/gcr-auth:
+          registry-url: gcr.io,us-west1-docker.pkg.dev
+      - checkout
+      - setup_remote_docker:
+          version: 20.10.11
+          docker_layer_caching: true
+      - run:
+          name: 'Normalize branch name to Docker tag spec'
+          command: |-
+            echo "export BRANCH_DOCKER_TAG=\$(sed -E s/'[^a-zA-Z0-9\._-]'/'-'/g \<<< '$CIRCLE_BRANCH' | head -c 128 )" >> $BASH_ENV
+      - run:
+          name: 'Prepare for buildx build'
+          command: |-
+            docker context create buildx-build
+            docker buildx create --use buildx-build
+            docker buildx version
+      - run:
+          name: 'Docker build (buildx)'
+          no_output_timeout: '20m'
+          environment:
+            IMAGE_NAME: gcr.io/stackblitz-images/stackblitz
+            CACHE_IMAGE_NAME: us-west1-docker.pkg.dev/stackblitz-images/stackblitz/build-cache
+            PARENT_BRANCH_TAG: master
+            ENGINEBLOCK_VERSION: 2aef224a91983a0ffc5e1cf1d248c8f233fe8c5e
+          command: |-
+            mkdir -p /tmp/build
+            docker buildx build \
+              --progress=plain \
+              --build-arg APP_COMMIT_HASH=$CIRCLE_SHA1 \
+              --build-arg ENGINEBLOCK_VERSION=$ENGINEBLOCK_VERSION \
+              -f ./Dockerfile \
+              -t $IMAGE_NAME:$CIRCLE_SHA1 \
+              -t $IMAGE_NAME:$BRANCH_DOCKER_TAG \
+              -t $IMAGE_NAME:latest \
+              --output type=docker \
+              --cache-to type=registry,mode=max,ref=$CACHE_IMAGE_NAME:$BRANCH_DOCKER_TAG,push=true \
+              --cache-from type=registry,ref=$CACHE_IMAGE_NAME:$BRANCH_DOCKER_TAG \
+              --cache-from type=registry,ref=$CACHE_IMAGE_NAME:$PARENT_BRANCH_TAG \
+              --cache-from type=registry,ref=$IMAGE_NAME:$BRANCH_DOCKER_TAG \
+              --metadata-file /tmp/build/metadata.json \
+              .
+      - docker/push:
+          registry: gcr.io
+          image: stackblitz-images/stackblitz
+          tag: '$CIRCLE_SHA1,$BRANCH_DOCKER_TAG'
+          digest-path: /tmp/workspace/digest.txt
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - "digest.txt"
+      - store_artifacts:
+          path: /tmp/build/metadata.json
+          destination: build-metadata.json
+      - store_artifacts:
+          path: /tmp/workspace/digest.txt
+          destination: docker-digest.txt
+      - when:
+          condition:
+            equal: [ master, << pipeline.git.branch >> ]
+          steps:
+            - docker/push:
+                registry: gcr.io
+                image: stackblitz-images/stackblitz
+                tag: 'latest'
+      - when:
+          condition: << pipeline.parameters.slack_trigger >>
+          steps:
+            - slack/notify:
+                event: fail
+                mentions: << pipeline.parameters.mentions >>
+                custom: |
+                  {
+                    "blocks": [
+                      {
+                        "type": "section",
+                        "text": {
+                          "type": "mrkdwn",
+                          "text": "$SLACK_PARAM_MENTIONS's Enterprise build of `$CIRCLE_BRANCH` failed :frowning:\n*(This does not affect staging)*"
+                        }
+                      }
+                    ]
+                  }
+            - slack/notify:
+                event: pass
+                mentions: << pipeline.parameters.mentions >>
+                custom: |
+                  {
+                    "blocks": [
+                      {
+                        "type": "section",
+                        "text": {
+                          "type": "mrkdwn",
+                          "text": "$SLACK_PARAM_MENTIONS's Enterprise build of `$CIRCLE_BRANCH` completed :white_check_mark:\n*(This does not affect staging)*"
+                        }
+                      }
+                    ]
+                  }
+
+  update-ee-kots-repo:
+    docker:
+      - image: cimg/base:stable
+    resource_class: medium+
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - github-cli/setup
+      - run:
+          name: Pluck current PR number
+          command: >-
+            gh pr -R replicated-collab/stackblitz-kots list -H "circleci/image-tag-updates"
+            -s open --json number -q '.[].number' > /tmp/pr_number
+      - run:
+          name: Configure git & clone repo
+          command: |-
+            git config --global user.name = "stackblitz-gitops"
+            git config --global user.email "adam+stackblitz-gitops@stackblitz.com"
+            gh repo clone replicated-collab/stackblitz-kots
+      - run:
+          name: Checkout/create PR branch, edit, commit & push
+          command: |-
+            cd ./stackblitz-kots
+            IMAGE_DIGEST=$(</tmp/workspace/digest.txt)
+            IMAGE_NAME=$(grep -oP '.*(?=@)' \<<< $IMAGE_DIGEST)
+            IMAGE_SHORT_NAME=$(grep -oP '(?<=\/)[\w-]+(?=@)' \<<< $IMAGE_DIGEST)
+            update_tags(){
+              sed -i -E s,"$IMAGE_DIGEST.*$","$IMAGE_NAME:$CIRCLE_SHA1",g ./manifests/*.yaml
+              sed -i -E s,"$IMAGE_NAME:[0-9a-f]{40}","$IMAGE_NAME:$CIRCLE_SHA1",g ./manifests/*.yaml
+              git add -u && git commit -m "chore: update \"$IMAGE_SHORT_NAME\" container image tag"
+              git push --set-upstream origin circleci/image-tag-updates
+              sed -i -e '/^\*\ new\ \"'$IMAGE_SHORT_NAME'\".*$/ s/$/~~/' -e '/^\*\ new\ \"'$IMAGE_SHORT_NAME'\"/ s/^\*\ /\*\ ~~/' /tmp/pr_body
+              printf "* new \"$IMAGE_SHORT_NAME\" container image built from << pipeline.project.git_url >>/commit/$CIRCLE_SHA1\n" >> /tmp/pr_body
+            }
+            if [ -s /tmp/pr_number ]; then
+              PR_ID=$(</tmp/pr_number) && gh pr checkout -f "$PR_ID"
+              gh pr view --json body -q '.body' "$PR_ID" > /tmp/pr_body
+              update_tags
+              gh pr edit "$PR_ID" -F /tmp/pr_body
+            else
+              git checkout -b "circleci/image-tag-updates"
+              printf "### Changes\n" > /tmp/pr_body
+              update_tags
+              gh pr create -t "chore: update image tag(s)" -F /tmp/pr_body
+            fi
+
+workflows:
+  test-build-and-push:
+    unless: << pipeline.parameters.slack_trigger >>
+    jobs:
+      - nx-test
+      - rails-node-test
+      - rails-test:
+          context: stackblitz-rails-test
+      - build-and-push-ee:
+          requires:
+            - nx-test
+            - rails-node-test
+            - rails-test
+          filters:
+            branches:
+              only:
+                - master
+                - enterprise-stable
+      - build-and-push-eb:
+          requires:
+            - nx-test
+            - rails-node-test
+            - rails-test
+          filters:
+            branches:
+              only:
+                - master
+      - update-ee-kots-repo:
+          requires:
+            - build-and-push-ee
+          context: replicated-kots
+          filters:
+            branches:
+              only:
+                - enterprise-stable
+
+  build-and-push-eb-slack:
+    when:
+      and:
+        - equal: [true, << pipeline.parameters.slack_trigger >>]
+        - equal: [false, << pipeline.parameters.build_ee_only >>]
+    jobs:
+      - build-and-push-eb:
+          context: slack-stackblitz-bot
+      - build-and-push-ee:
+          context: slack-stackblitz-bot
+
+  build-and-push-ee-slack:
+    when:
+      and:
+        - equal: [true, << pipeline.parameters.slack_trigger >>]
+        - equal: [true, << pipeline.parameters.build_ee_only >>]
+    jobs:
+      - build-and-push-ee:
+          context: slack-stackblitz-bot
 
 parameters:
-  run_git_tag:
+  slack_trigger:
+    type: boolean
+    default: false
+  build_ee_only:
+    type: boolean
+    default: false
+  mentions:
     type: string
-    default: << pipeline.git.tag >>
-
-jobs:
-  default_tests:
-    macos:
-      xcode: 13.1.0
-    shell: /bin/bash --login -eo pipefail
-    environment:
-      - TZ: Europe/Brussels
-    steps:
-      - checkout
-  default_build_and_deploy:
-    macos:
-      xcode: 13.1.0
-    shell: /bin/bash --login -eo pipefail
-    environment:
-      - TZ: Europe/Brussels
-    steps:
-      - checkout
-
-# Followed example https://github.com/halfer/cd-demo-container/blob/master/.circleci/config.yml
-workflows:
-  version: 2
-  # This runs on non-tag pushes
-  untagged-build:
-    jobs:
-      - default_tests:
-        filters:
-          tags:
-            ignore: /.*/
-  # This only runs on deploy tags and not branches https://discuss.circleci.com/t/how-to-force-run-a-periodic-workflow/28647/3
-  tagged-build:
-    when: << pipeline.parameters.run_git_tag >>
-    jobs:
-      - default_tests
-      - default_build_and_deploy:
-          requires:
-            - default_tests
-            
+    default: ""
