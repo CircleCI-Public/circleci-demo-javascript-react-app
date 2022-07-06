@@ -20,22 +20,22 @@ commands:
   sayhello:
     description: "Configure git to commit"
     parameters:
-      email_address:
-        type: string
-        default: "sam01983@carejourney.com"
-        description: "Email address of the git user"
-      user_name:
-        type: string
-        default: "Sam Akpan"
-        description: "Name of the git user"
+      email_address:
+        type: string
+        default: "sam01983@carejourney.com"
+        description: "Email address of the git user"
+      user_name:
+        type: string
+        default: "Sam Akpan"
+        description: "Name of the git user"
     steps:
-      - run:
-          environment:
-            PARAM_EMAIL_ADDRESS: <<parameters.email_address>>
-            PARAM_USER_NAME: <<parameters.user_name>>
-          name: Configure Git
-          command: pwd
-          #command: <<include(scripts/configure-git.sh)>>
+      - run:
+          environment:
+            PARAM_EMAIL_ADDRESS: <<parameters.email_address>>
+            PARAM_USER_NAME: <<parameters.user_name>>
+          name: Configure Git
+          command: pwd
+          #command: <<include(scripts/configure-git.sh)>>
 
 
 
