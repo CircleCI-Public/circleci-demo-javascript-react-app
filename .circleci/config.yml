@@ -1,6 +1,6 @@
 version: 2.1
-orbs:
-  mem: circleci/rememborb@x.y.z
+orbs: 
+  rememborb: circleci/rememborb@0.0.2
 jobs:
   publish_image:
     docker:
