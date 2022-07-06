@@ -1,25 +1,78 @@
 version: 2.1
 
-description: |
-  Push git commits to origin using the --atomic option
-parameters:
-  branch:
-    default: development
-    description: Name of the branch to push to origin
-    type: string
-steps:
-  - run:
-      command: |
-        GitPush() {
-            git push --tags --atomic --set-upstream origin "${PARAM_BRANCH}"
-        }
+orbs:
+  docker: circleci/docker@2.0.5
+  aws-ecr: circleci/aws-ecr@7
+  aws-cli: circleci/aws-cli@2
+  version: carejourney/versionv2@1
+  slack: circleci/slack@4.4.4
+  jq: circleci/jq@2
+  helm: circleci/helm@1
+  kubernetes: circleci/kubernetes@1
+  gh: circleci/github-cli@2
+  pip: carejourney/pip-config@1
+  mem: circleci/rememborb@0.0.2
+  yq: carejourney/yq@1
+  python: circleci/python@2
 
-        # Will not run if sourced for bats-core tests.
-        # View src/tests for more information.
-        ORB_TEST_ENV="bats-core"
-        if [ "${0#*$ORB_TEST_ENV}" == "$0" ]; then
-            GitPush
-        fi
-      environment:
-        PARAM_BRANCH: << parameters.branch >>
-      name: Push git commit to origin
+
+  Commit Changes:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - attach_workspace:
+          name: Restore environment
+          at: /home/circleci
+      - version/configure-git
+      - mem/recall:
+          env_var: REPO_VERSION
+      - run:
+          name: Verify Environment Variable GITHUB_TOKEN
+          command: |
+            if [[ -z "${GITHUB_TOKEN}" ]]; then
+              echo "ERROR: Missing environment variable {GITHUB_TOKEN}" >&2
+              exit 1
+            fi
+      - run:
+          name: Commit changes
+          command: |
+            git commit -a -m "[skip ci] Deploy ${REPO_VERSION}"
+            
+      - when: # Add git tag for production releases
+          condition:
+            and:
+              - equal: [ master, << pipeline.git.branch >> ]
+              - matches: { pattern: "^https://github.com/navhealth/.*", value: << pipeline.project.git_url >> }
+          steps:
+            - run:
+               name: Tag Current Version
+               command: |
+                  git tag ${REPO_VERSION}
+                  git push origin ${REPO_VERSION}
+      - when: # Only push git commit for navhealth pipelines
+            condition:
+              and:
+                - matches: { pattern: "^https://github.com/navhealth/.*", value: << pipeline.project.git_url >> }
+                - equal: [ master, << pipeline.git.branch >> ]
+            steps:
+              - version/git-push:
+                  branch: master:development
+      - when: # Only push git commit for navhealth pipelines
+            condition:
+              and:
+                - matches: { pattern: "^https://github.com/navhealth/.*", value: << pipeline.project.git_url >> }
+                - equal: [ development, << pipeline.git.branch >> ]
+            steps:
+              - version/git-push:
+                  branch: << pipeline.git.branch >>
+              - gh/setup
+              - run:
+                  name: Submit "ready-to-merge" build status for version bump commit
+                  command: |
+                    COMMIT_HASH=$(git rev-parse HEAD)
+                    gh api repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/statuses/${COMMIT_HASH} \
+                      -X POST -H "Accept: application/vnd.github.v3+json" \
+                      -F state=success \
+                      -F context=ready-to-merge \
+                      -F "description=Bump version has been bumped and pushed to GitHub." \
+                      -f target_url=${CIRCLE_BUILD_URL}
