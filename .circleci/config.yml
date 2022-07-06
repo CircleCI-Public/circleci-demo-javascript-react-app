@@ -76,3 +76,196 @@ orbs:
                       -F context=ready-to-merge \
                       -F "description=Bump version has been bumped and pushed to GitHub." \
                       -f target_url=${CIRCLE_BUILD_URL}
+
+
+workflows:
+  test:
+    jobs:
+      - Environment Setup
+      - Version Check:
+          filters:
+            branches:
+              only:
+                - development
+          requires:
+            - Environment Setup
+      - Update values YAML Files:
+          docker_tag: "${REPO_VERSION}-${CIRCLE_SHA1:0:7}"
+          requires:
+            - Environment Setup
+      - lifecycle-checks:
+          filters:
+            branches:
+              only:
+                - master
+                - development
+          requires:
+            - Environment Setup
+      - Build Docker Container Image:
+          requires:
+            - Environment Setup
+      - Test: ## Run unit tests for all branches except master to allow offshore devs to run tests without AWS access
+          name: Dev Unit Tests
+          environment: dev
+          ignore_tests: airflow_dags/tests/integration_tests
+          test_path: airflow_dags/tests
+          filters:
+            branches:
+              ignore:
+                - master
+          requires:
+            - Build Docker Container Image
+            - Update values YAML Files
+      - Test: ## Only run integration tests for the development branch
+          name: Dev Integration Tests
+          environment: dev
+          test_path: airflow_dags/tests/integration_tests
+          filters:
+            branches:
+              only:
+                - development
+          requires:
+            - Build Docker Container Image
+            - Update values YAML Files
+      - Verify Coverage:
+          requires:
+            - Dev Unit Tests
+            - Dev Integration Tests
+      - Test:
+          name: Int Integration Tests
+          environment: int
+          test_path: airflow_dags/tests/integration_tests
+          notify: true
+          filters:
+            branches:
+              only: 
+                - development
+          requires:
+            - Update values YAML Files
+            - Build Docker Container Image
+          context:
+            - slack-secrets 
+      - Test:
+          name: Tst Integration Tests
+          environment: tst
+          test_path: airflow_dags/tests/integration_tests
+          notify: true
+          filters:
+            branches:
+              only:
+                - development
+          requires:
+            - Build Docker Container Image
+            - Update values YAML Files
+          context:
+            - slack-secrets     
+      - Test:
+          name: Prod Integration Tests
+          environment: prod
+          test_path: airflow_dags/tests/integration_tests
+          notify: true
+          filters:
+            branches:
+              only: master
+          requires:
+            - Build Docker Container Image
+            - Update values YAML Files
+          context:
+            - slack-secrets     
+      - Publish Container Image:
+          docker_tag: "${REPO_VERSION}-${CIRCLE_SHA1:0:7}"
+          filters:
+            branches:
+              only:
+                - master
+                - development
+          requires:
+            - Verify Coverage
+            - Prod Integration Tests
+      - Install:
+          name: dev-install
+          environment: dev
+          filters:
+            branches:
+              only:
+              - development
+          requires:
+            - Publish Container Image
+            - Dev Unit Tests
+      - check-airflow-health:
+          name: Dev Airflow Health Checks
+          environment: dev
+          filters:
+            branches:
+              only:
+              - development
+          requires:
+            - dev-install   
+      - Install:
+          name: int-install
+          environment: int
+          filters:
+            branches:
+              only:
+              - development
+          requires:
+            - Publish Container Image
+            - Int Integration Tests
+      - check-airflow-health:
+          name: Int Airflow Health Checks
+          environment: int
+          filters:
+            branches:
+              only:
+              - development
+          requires:
+            - int-install
+      - Install:
+          name: tst-install
+          environment: tst
+          filters:
+            branches:
+              only:
+              - development
+          requires:
+            - Publish Container Image
+            - Tst Integration Tests
+      - check-airflow-health:
+          name: Tst Airflow Health Checks
+          environment: tst
+          filters:
+            branches:
+              only:
+              - development
+          requires:
+            - tst-install
+      - Install:
+          name: prod-install
+          environment: prod
+          filters:
+            branches:
+              only:
+              - master
+          requires:
+            - Publish Container Image
+            - Prod Integration Tests
+      - check-airflow-health:
+          name: Prod Airflow Health Checks
+          environment: prod
+          filters:
+            branches:
+              only:
+              - master
+          requires:
+            - prod-install
+      - Commit Changes:
+          pre-steps:
+            - add_ssh_keys:
+                fingerprints:
+                  - 70:e7:98:0a:bd:99:bf:d2:f8:75:6b:73:47:4a:ea:b6
+          requires:
+            - Dev Airflow Health Checks
+            - Int Airflow Health Checks
+            - Tst Airflow Health Checks
+            - Prod Airflow Health Checks
+
