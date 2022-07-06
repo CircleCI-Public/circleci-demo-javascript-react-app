@@ -17,7 +17,7 @@ orbs:
 
 
 commands:
-  sayhello:
+  gitconfigure:
     description: "Configure git to commit"
     parameters:
       email_address:
@@ -38,3 +38,8 @@ commands:
           #command: <<include(scripts/configure-git.sh)>>
 
 
+
+workflows:
+  Git Configure:
+    commands:
+      - gitconfigure
