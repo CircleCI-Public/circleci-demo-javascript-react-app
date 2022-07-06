@@ -8,7 +8,7 @@ jobs:
     steps:
       - rememborb/remember:
           env_var: REPO_VERSION
-          value: 'super_cool_image:1.0.$CIRCLE_BUILD_NUM-$CIRCLE_SHA'
+          value: 'super_cool_image:1.0.$CIRCLE_BUILD_NUM-$CIRCLE_PROJECT_USERNAME'
       #- run: docker build -t $IMAGE_TAG .
       #- run: docker push $IMAGE_TAG
   test_image:
@@ -26,7 +26,7 @@ jobs:
       - rememborb/recall:
           env_var: REPO_VERSION
       - run: echo $REPO_VERSION
-      - run: echo "This is the env repo:" $IMAGE_TAG
+      - run: echo "This is the env repo:" $REPO_VERSION
 workflows:
   highly_fault_tolerant_delivery:
     jobs:
