@@ -4,29 +4,29 @@ orbs:
 jobs:
   publish_image:
     docker:
-      - image: 'circleci/python:3.7'
+      - image: cimg/base:stable
     steps:
       - mem/remember:
-          env_var: IMAGE_TAG
+          env_var: REPO_VERSION
           value: 'super_cool_image:1.0.$CIRCLE_BUILD_NUM-$CIRCLE_SHA'
-      - run: docker build -t $IMAGE_TAG .
-      - run: docker push $IMAGE_TAG
+      #- run: docker build -t $IMAGE_TAG .
+      #- run: docker push $IMAGE_TAG
   test_image:
     docker:
-      - image: 'circleci/python:3.7'
+      - image: cimg/base:stable
     steps:
       - mem/recall:
-          env_var: IMAGE_TAG
-      - run: docker pull $IMAGE_TAG
-      - run: docker run $IMAGE_TAG test_coolness
+          env_var: REPO_VERSION
+      - run: echo $REPO_VERSION
+      #- run: docker run $IMAGE_TAG test_coolness
   deploy_image:
     docker:
-      - image: 'circleci/python:3.7'
+      - image: cimg/base:stable
     steps:
       - mem/recall:
-          env_var: IMAGE_TAG
-      - run: docker pull $IMAGE_TAG
-      - run: some_kubernetes_shenanigans $IMAGE_TAG
+          env_var: REPO_VERSION
+      - run: echo $REPO_VERSION
+      - run: echo "This is the env repo:" $IMAGE_TAG
 workflows:
   highly_fault_tolerant_delivery:
     jobs:
