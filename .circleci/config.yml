@@ -16,6 +16,21 @@ orbs:
   python: circleci/python@2
 
 
+  Environment Setup:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - yq/install
+      - mem/remember:
+          env_var: REPO_VERSION
+          value: $(cat config.ini | sed -n 2p | cut -d' ' -f 3)
+      - persist_to_workspace:
+          name: Save environment
+          root: /home/circleci/
+          paths:
+            - project
+
   Commit Changes:
     docker:
       - image: cimg/base:stable
