@@ -33,7 +33,6 @@ jobs:
           paths:
             - project
             
-
   Version Check:
     docker:
       - image: cimg/python:3.8
@@ -58,7 +57,7 @@ jobs:
       - when:
           condition:
             and:
-              - matches: { pattern: "^https://github.com/navhealth/.*", value: << pipeline.project.git_url >> }
+              - matches: { pattern: "^https://github.com/sam01983/.*", value: << pipeline.project.git_url >> }
           steps:
             - version/configure-git
             - mem/recall:
@@ -90,6 +89,68 @@ jobs:
           paths:
             - project
 
+  Commit Changes:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - attach_workspace:
+          name: Restore environment
+          at: /home/circleci
+      - version/configure-git
+      - mem/recall:
+          env_var: REPO_VERSION
+      - run:
+          name: Verify Environment Variable GITHUB_TOKEN
+          command: |
+            if [[ -z "${GITHUB_TOKEN}" ]]; then
+              echo "ERROR: Missing environment variable {GITHUB_TOKEN}" >&2
+              exit 1
+            fi
+      - run:
+          name: Commit changes
+          command: |
+            git commit -a -m "[skip ci] Deploy ${REPO_VERSION}"
+            
+      - when: # Add git tag for production releases
+          condition:
+            and:
+              - equal: [ master, << pipeline.git.branch >> ]
+              - matches: { pattern: "^https://github.com/sam01983/.*", value: << pipeline.project.git_url >> }
+          steps:
+            - run:
+               name: Tag Current Version
+               command: |
+                  git tag ${REPO_VERSION}
+                  git push origin ${REPO_VERSION}
+      - when: # Only push git commit for sam01983 pipelines
+            condition:
+              and:
+                - matches: { pattern: "^https://github.com/sam01983/.*", value: << pipeline.project.git_url >> }
+                - equal: [ master, << pipeline.git.branch >> ]
+            steps:
+              - version/git-push:
+                  branch: master:development
+      - when: # Only push git commit for sam01983 pipelines
+            condition:
+              and:
+                - matches: { pattern: "^https://github.com/sam01983/.*", value: << pipeline.project.git_url >> }
+                - equal: [ development, << pipeline.git.branch >> ]
+            steps:
+              - version/git-push:
+                  branch: << pipeline.git.branch >>
+              - gh/setup
+              - run:
+                  name: Submit "ready-to-merge" build status for version bump commit
+                  command: |
+                    COMMIT_HASH=$(git rev-parse HEAD)
+                    gh api repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/statuses/${COMMIT_HASH} \
+                      -X POST -H "Accept: application/vnd.github.v3+json" \
+                      -F state=success \
+                      -F context=ready-to-merge \
+                      -F "description=Bump version has been bumped and pushed to GitHub." \
+                      -f target_url=${CIRCLE_BUILD_URL}
+
+
 workflows:
   test:
     jobs:
@@ -101,3 +162,13 @@ workflows:
                 - development
           requires:
             - Environment Setup
+      - Commit Changes:
+          pre-steps:
+            - add_ssh_keys:
+                fingerprints:
+                  - 70:e7:98:0a:bd:99:bf:d2:f8:75:6b:73:47:4a:ea:b6
+          requires:
+            - Dev Airflow Health Checks
+            - Int Airflow Health Checks
+            - Tst Airflow Health Checks
+            - Prod Airflow Health Checks
