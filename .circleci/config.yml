@@ -1,84 +1,39 @@
 version: 2.1
-
-orbs:
-  node: circleci/node@5.0.2
-  heroku: circleci/heroku@1.2.6
-
-setup: true
-
+orbs: 
+  rememborb: circleci/rememborb@0.0.2
 jobs:
-  build_and_test:
+  publish_image:
     docker:
-      - image: cimg/node:17.2.0
+      - image: cimg/base:stable
     steps:
-      - checkout
-      # - node/install-packages:
-      #     pkg-manager: yarn
-      # - run:
-      #     command: yarn test
-      #     name: Run tests
-      # - run:
-      #     command: yarn build
-      #     name: Build app
-      # - persist_to_workspace:
-      #     root: ~/project
-      #     paths:
-      #       - .
-  deploy: # this can be any name you choose
+      - rememborb/remember:
+          env_var: REPO_VERSION
+          value: 'super_cool_image:1.0.$CIRCLE_BUILD_NUM-$CIRCLE_PROJECT_USERNAME'
+      #- run: docker build -t $IMAGE_TAG .
+      #- run: docker push $IMAGE_TAG
+  test_image:
     docker:
-      - image: cimg/node:17.2.0
+      - image: cimg/base:stable
     steps:
-      - checkout
-      # - attach_workspace:
-      #     at: ~/project
-      # - heroku/deploy-via-git: 
-      #     force: true # force push when pushing to the heroku remote, see: https://devcenter.heroku.com/articles/git
-
-workflows:
-  on_commit:
-    jobs:
-      - build_and_test
-      # Follow instructions here to authenticate git for Heroku: https://devcenter.heroku.com/articles/git#http-git-authentication
-      # The following code may be uncommented, onnce HEROKU_API_KEY & HEROKU_APP_NAME environemnt variables are present
-      # Read more: https://circleci.com/docs/2.0/env-vars/
-      # - deploy:
-      #     requires:
-      #       - build_and_test # only deploy if the build_and_test job has completed
-      #     filters:
-      #       branches:
-      #         only: master # only deploy when on main/master
-  nightly:
-    triggers:
-      - schedule:
-          cron: "0 0 * * *"       
-          filters:
-            branches:
-              only:
-                - master
-    jobs:
-      - build_and_test
-      # Follow instructions here to authenticate git for Heroku: https://devcenter.heroku.com/articles/git#http-git-authentication
-      # The following code may be uncommented, onnce HEROKU_API_KEY & HEROKU_APP_NAME environemnt variables are present
-      # Read more: https://circleci.com/docs/2.0/env-vars/
-      # - deploy:
-      #     requires:
-      #       - build_and_test # only deploy if the build_and_test job has completed
-      #     filters:
-      #       branches:
-      #         only: master # only deploy when on main/master
-
-  checking-branch:
-    <<: *default-executor
+      - rememborb/recall:
+          env_var: REPO_VERSION
+      - run: echo $REPO_VERSION
+      #- run: docker run $IMAGE_TAG test_coolness
+  deploy_image:
+    docker:
+      - image: cimg/base:stable
     steps:
-      - checkout
-      - run: 
-          command: |
-            if [ << pipeline.git.branch >> != "main" ]; then
-              exit 1
-            fi
-      - continuation/continue:
-          configuration_path: config2.yml  
+      - rememborb/recall:
+          env_var: REPO_VERSION
+      - run: echo $REPO_VERSION
+      - run: echo "This is the env repo:" $REPO_VERSION
 workflows:
-  run-if-main:
+  highly_fault_tolerant_delivery:
     jobs:
-      - checking-branch
+      - publish_image
+      - test_image:
+          requires:
+            - publish_image
+      - deploy_image:
+          requires:
+            - test_image

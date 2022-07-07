@@ -1,0 +1,66 @@
+version: 2.1
+
+jobs:
+  test: #name of job
+    docker:
+      - image: cimg/node:18.4.0 #executor image from circlci 
+    steps:
+      - checkout
+      - run: 
+          name: Install Dependencies
+          command: npm install --force
+      - run:
+          name: Run Test
+          command: npm run test
+
+workflows:
+  test-deploy: # Name of workflow
+    jobs: #within the workflow define the jobs you would like to run
+     - test
+
+
+#############-------
+# schedule a workflow
+#############-------
+
+jobs:
+  build: #name of job
+    docker:
+      - image: cimg/node:18.4.0 #executor image from circlci 
+    working_directory: ~/circleci-demo-schedule
+    steps:
+      - checkout
+      - run: 
+          name: Run Build Command
+          command: echo "I am building and testing"
+          command: ls -al
+
+  deploy: #name of job
+    docker:
+      - image: cimg/node:18.4.0 #executor image from circlci 
+    working_directory: ~/circleci-demo-schedule
+    steps:
+      - checkout
+      - run: 
+          name: Run Build Command
+          command: echo "I am building and testing"
+          command: cd 
+          command: ls -la
+
+workflows:
+  commit-workflow: # Name of workflow
+    jobs: #within the workflow define the jobs you would like to run
+     - build
+  schedule-workflow:
+    triggers: #what triggers the workflow
+      - schedule: #workflow triggers are scheduled
+          cron: "0 * * * *" #what every hour
+          filters: #filter workflow schedule to trigger on master branch only
+            branches:
+              only: 
+                - master
+    jobs:
+      - build
+      - deploy
+
+
