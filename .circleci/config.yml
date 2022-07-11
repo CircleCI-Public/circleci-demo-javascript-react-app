@@ -1,38 +1,61 @@
-version: 2 # use CircleCI 2.0
+# Use the latest 2.1 version of CircleCI pipeline process engine.
+# See: https://circleci.com/docs/2.0/configuration-reference
+version: 2.1
+
+orbs:
+  node: circleci/node@5.0.2
+# Define a job to be invoked later in a workflow.
+# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  build:
+  fetch-code:
+    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
+    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
-      - image: circleci/node:10
+      - image: cimg/base:stable
+    # Add steps to the job
+    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
-      - checkout # special step to check out source code to working directory
-
-      - restore_cache: # special step to restore the dependency cache
-          # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
-          keys: 
-            - v1-repo-{{ checksum "package-lock.json" }}
-
+      - checkout
       - run:
-          name: Install dependencies with NPM
-          command: npm install # replace with `yarn install` if using yarn
-
-      - save_cache: # special step to save the dependency cache
-          key: v1-repo-{{ checksum "package-lock.json" }}
-          paths:
-            - "node_modules"
-
+          name: "hi"
+          command: |
+            echo "hi"
+  setup-requirements:
+    executor: node/default
+    steps:
       - run:
-          name: Run tests
-          # Runs jest with "--maxWorkers=2" argument to avoid OOM issues
-          command: npm test # replace with `yarn test` if using yarn
+          name: "Run hi"
+          command: echo "hi"
+    # completion:
+      # - slack/notify:
+      #     channel: "#automation" 
+      #     ignore_errors: false 
+      #     custom: EveBE Circle CI Job Complete
+  use-node:
+    executor: node/default
+    steps:
+      - run:
+          name: Running the Node Container
+          command: |
+            node -v
+  runner-test:
+    machine: true
+    resource_class: jkg-namespace/jkg-resource-class2
+    steps:
+      - run: echo "Hi I'm on Runners!"
 
-      - store_artifacts: 
-          path: test-results
-
-      - store_test_results:
-          path: test-results
-
+# Invoke jobs via workflows
+# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
-  version: 2
-  Build and Test:
+  main-workflow:
     jobs:
-      - build
+      - fetch-code
+      - setup-requirements:
+          requires:
+            - fetch-code
+      - use-node:
+          requires:
+            - setup-requirements
+      - runner-test:
+          requires:
+            - use-node
