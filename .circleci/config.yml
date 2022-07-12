@@ -1,61 +1,13 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
-orbs:
-  node: circleci/node@5.0.2
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
+workflows:
+  build:
+    jobs:
+      - ansible
+
 jobs:
-  fetch-code:
-    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
-    docker:
-      - image: cimg/base:stable
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+  ansible:
+    machine: true
+    resource_class: jkg-runner/jkg-resource-class2
     steps:
       - checkout
-      - run:
-          name: "hi"
-          command: |
-            echo "hi"
-  setup-requirements:
-    executor: node/default
-    steps:
-      - run:
-          name: "Run hi"
-          command: echo "hi"
-    # completion:
-      # - slack/notify:
-      #     channel: "#automation" 
-      #     ignore_errors: false 
-      #     custom: EveBE Circle CI Job Complete
-  use-node:
-    executor: node/default
-    steps:
-      - run:
-          name: Running the Node Container
-          command: |
-            node -v
-  runner-test:
-    machine: true
-    resource_class: jkg-namespace/jkg-runner
-    steps:
-      - run: echo "Hi I'm on Runners!"
-
-# Invoke jobs via workflows
-# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
-workflows:
-  main-workflow:
-    jobs:
-      - fetch-code
-      - setup-requirements:
-          requires:
-            - fetch-code
-      - use-node:
-          requires:
-            - setup-requirements
-      - runner-test:
-          requires:
-            - use-node
