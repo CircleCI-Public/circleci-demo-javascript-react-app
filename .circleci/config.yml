@@ -8,6 +8,6 @@ workflows:
 jobs:
   ansible:
     machine: true
-    resource_class: jkg-runner/jkg-resource-class2
+    resource_class: jkg-namespace/jkg-jul2022-namespace
     steps:
       - checkout
