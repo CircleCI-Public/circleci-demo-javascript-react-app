@@ -1,13 +1,30 @@
 version: 2.1
-
-workflows:
-  build:
-    jobs:
-      - ansible
-
+orbs: {node: circleci/node@5.0.2, heroku: circleci/heroku@1.2.6}
 jobs:
-  ansible:
-    machine: true
-    resource_class: jkg-namespace/jkg-jul2022-namespace
+  build_and_test:
+    executor: 
+      name: node/default
+      tag: stable
     steps:
-      - checkout
+    - checkout
+    - node/install-packages: {pkg-manager: yarn}
+    - run: {command: yarn test, name: Run tests}
+    - run: {command: yarn build, name: Build app}
+    - persist_to_workspace:
+        root: ~/project
+        paths: [.]
+  deploy:
+    docker:
+    - {image: 'cimg/node:17.2.0'}
+    steps:
+    - attach_workspace: {at: ~/project}
+    - heroku/deploy-via-git: {force: true}
+workflows:
+  version: 2
+  nightly:
+    jobs:
+    - build_and_test
+    - deploy:
+        requires: [build_and_test]
+        filters:
+          branches: {only: master}
