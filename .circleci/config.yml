@@ -13,6 +13,8 @@ jobs:
       - checkout
       - node/install-packages:
           pkg-manager: yarn
+          app-dir: /
+          with-cache: true
       - run:
           command: yarn test
           name: Run tests
