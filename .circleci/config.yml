@@ -1,9 +1,20 @@
 orbs:
-  node: circleci/node@4.2.0
+  node: circleci/node@5.0.2
 
 version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: cimg/node:17.2.0
+    steps:
+      - checkout
+      - run: 
+          command: | 
+            echo "hi"
 
 workflows:
   regex-tests:
     jobs:
-      - node/test
+      - build
+      # - node/test
