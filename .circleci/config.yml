@@ -1,67 +1,20 @@
-
-
 version: 2.1
+
 orbs:
-  node: circleci/node@4.7.0
-  heroku: circleci/heroku@1.2.6
+  node: circleci/node@5.0.2
 
 jobs:
-  build_and_test:
+  build:
     docker:
       - image: cimg/node:17.2.0
     steps:
       - checkout
-      - node/install-packages:
-          pkg-manager: yarn
-          with-cache: true
-      - run:
-          command: yarn test
-          name: Run tests
-      - run:
-          command: yarn build
-          name: Build app
-      - persist_to_workspace:
-          root: ~/project
-          paths:
-            - .
-  deploy: # this can be any name you choose
-    docker:
-      - image: cimg/node:17.2.0
-    steps:
-      - attach_workspace:
-          at: ~/project
-      - heroku/deploy-via-git: 
-          force: true # force push when pushing to the heroku remote, see: https://devcenter.heroku.com/articles/git
+      - run: 
+          command: | 
+            echo "hi"
 
 workflows:
-  on_commit:
+  regex-tests:
     jobs:
-      - build_and_test
-      # Follow instructions here to authenticate git for Heroku: https://devcenter.heroku.com/articles/git#http-git-authentication
-      # The following code may be uncommented, onnce HEROKU_API_KEY & HEROKU_APP_NAME environemnt variables are present
-      # Read more: https://circleci.com/docs/2.0/env-vars/
-      # - deploy:
-      #     requires:
-      #       - build_and_test # only deploy if the build_and_test job has completed
-      #     filters:
-      #       branches:
-      #         only: master # only deploy when on main/master
-  nightly:
-    triggers:
-      - schedule:
-          cron: "0 0 * * *"       
-          filters:
-            branches:
-              only:
-                - master
-    jobs:
-      - build_and_test
-      # Follow instructions here to authenticate git for Heroku: https://devcenter.heroku.com/articles/git#http-git-authentication
-      # The following code may be uncommented, onnce HEROKU_API_KEY & HEROKU_APP_NAME environemnt variables are present
-      # Read more: https://circleci.com/docs/2.0/env-vars/
-      # - deploy:
-      #     requires:
-      #       - build_and_test # only deploy if the build_and_test job has completed
-      #     filters:
-      #       branches:
-      #         only: master # only deploy when on main/master
+      - build
+      # - node/test
