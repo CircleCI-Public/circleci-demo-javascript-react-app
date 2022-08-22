@@ -6,7 +6,6 @@ import Header from './Components/Header';
 import Container from './Components/Container';
 import Card from './Components/Card';
 
-
 class App extends Component {
   render() {
     return (
