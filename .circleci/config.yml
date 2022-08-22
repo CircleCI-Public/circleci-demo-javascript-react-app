@@ -5,6 +5,16 @@ version: 2.1
 
 setup: true
 
+parameters:
+  build-code:
+    description: is it in src
+    type: boolean
+    default: failse
+  build-docs:
+    description: is the change in doc
+    type: boolean
+    default: true
+
 orbs: 
   path-filtering: circleci/path-filtering@0.1.3
 
