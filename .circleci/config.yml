@@ -2,7 +2,7 @@ orbs:
   node: circleci/node@5.0.2
   path-filtering: circleci/path-filtering@0.1.3
   continuation: circleci/continuation@0.3.1
-  
+
 version: 2.1
 
 setup: true
@@ -26,3 +26,6 @@ workflows:
           mapping: |
             src/.* build-code true
             doc/.* build-docs true
+      - continuation/continue:
+          configuration_path: ./continue-config.yml
+
