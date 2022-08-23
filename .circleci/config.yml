@@ -11,7 +11,7 @@ parameters:
   build-code:
     description: is it in src
     type: boolean
-    default: failse
+    default: true
   build-docs:
     description: is the change in doc
     type: boolean
