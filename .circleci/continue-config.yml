@@ -6,13 +6,13 @@ orbs:
 parameters:
   build-docs:
     type: boolean
-    default: false
+    default: true
   build-code:
     type: boolean
     default: false
 
 jobs:
-  build_and_test:
+  build-code:
     docker:
       - image: cimg/node:17.2.0
     steps:
@@ -29,14 +29,14 @@ jobs:
           root: ~/project
           paths:
             - .
-  deploy: # this can be any name you choose
+  build-src: # this can be any name you choose
     docker:
       - image: cimg/node:17.2.0
     steps:
-      - attach_workspace:
-          at: ~/project
-      - heroku/deploy-via-git: 
-          force: true # force push when pushing to the heroku remote, see: https://devcenter.heroku.com/articles/git
+      - checkout
+      - run:  
+          command: |
+            echo "hi"
 
 workflows:
   on_commit:
