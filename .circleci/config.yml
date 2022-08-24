@@ -18,7 +18,7 @@ jobs:
     steps:
       - checkout
       - node/install-packages:
-          pkg-manager: npm
+          pkg-manager: yarn
       - run:
           command: npm test
           name: Run tests
