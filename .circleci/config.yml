@@ -43,7 +43,7 @@ workflows:
     # when: 
     #   - << pipeline.parameters.builds-docs >>
     jobs:
-      - build_and_test
+      - build-code
       # Follow instructions here to authenticate git for Heroku: https://devcenter.heroku.com/articles/git#http-git-authentication
       # The following code may be uncommented, onnce HEROKU_API_KEY & HEROKU_APP_NAME environemnt variables are present
       # Read more: https://circleci.com/docs/2.0/env-vars/
