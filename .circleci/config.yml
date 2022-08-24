@@ -3,13 +3,13 @@ orbs:
   node: circleci/node@4.7.0
   heroku: circleci/heroku@1.2.6
 
-parameters:
-  build-docs:
-    type: boolean
-    default: true
-  build-code:
-    type: boolean
-    default: false
+# parameters:
+#   build-docs:
+#     type: boolean
+#     default: true
+#   build-code:
+#     type: boolean
+#     default: false
 
 jobs:
   build-code:
@@ -40,8 +40,8 @@ jobs:
 
 workflows:
   on_commit:
-    when: 
-      - << pipeline.parameters.builds-docs >>
+    # when: 
+    #   - << pipeline.parameters.builds-docs >>
     jobs:
       - build_and_test
       # Follow instructions here to authenticate git for Heroku: https://devcenter.heroku.com/articles/git#http-git-authentication
