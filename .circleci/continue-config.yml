@@ -14,7 +14,7 @@ parameters:
 jobs:
   build-code:
     docker:
-      - image: cimg/node:17.2.0
+      - image: cimg/node:14.15.4
     steps:
       - checkout
       - node/install-packages:
