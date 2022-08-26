@@ -1,55 +1,16 @@
 version: 2.1
-orbs:
-  node: circleci/node@4.7.0
-  heroku: circleci/heroku@1.2.6
-
-# parameters:
-#   build-docs:
-#     type: boolean
-#     default: true
-#   build-code:
-#     type: boolean
-#     default: false
 
 jobs:
-  build-code:
-    docker:
-      - image: cimg/node:14.15.4
+  test-ci-install:
+    macos:
+      xcode: "13.3"
+    resource_class: macos.x86.metal.gen1
     steps:
       - checkout
-      - node/install-packages:
-          pkg-manager: yarn
       - run:
-          command: npm test
-          name: Run tests
-      - run:
-          command: npm build
-          name: Build app
-      - persist_to_workspace:
-          root: ~/project
-          paths:
-            - .
-  build-src: # this can be any name you choose
-    docker:
-      - image: cimg/node:17.2.0
-    steps:
-      - checkout
-      - run:  
           command: |
             echo "hi"
-
 workflows:
-  on_commit:
-    # when: 
-    #   - << pipeline.parameters.builds-docs >>
-    jobs:
-      - build-code
-      # Follow instructions here to authenticate git for Heroku: https://devcenter.heroku.com/articles/git#http-git-authentication
-      # The following code may be uncommented, onnce HEROKU_API_KEY & HEROKU_APP_NAME environemnt variables are present
-      # Read more: https://circleci.com/docs/2.0/env-vars/
-      # - deploy:
-      #     requires:
-      #       - build_and_test # only deploy if the build_and_test job has completed
-      #     filters:
-      #       branches:
-      #         only: master # only deploy when on main/master
+  test-ci-workflow:
+    jobs: 
+      - test-ci-install
