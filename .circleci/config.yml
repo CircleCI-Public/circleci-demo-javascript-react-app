@@ -12,7 +12,6 @@ jobs:
       - node/install-packages:
           cache-path: ~/project/node_modules
           with-cache: true
-          override-ci-command: npm install
           cache-version: v1
       - run:
           command: yarn test
