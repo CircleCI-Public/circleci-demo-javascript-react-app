@@ -11,6 +11,7 @@ jobs:
       - checkout
       - node/install-packages:
           pkg-manager: yarn
+          cache-version: v2
       - run:
           command: yarn test
           name: Run tests
