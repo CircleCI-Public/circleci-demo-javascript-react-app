@@ -10,8 +10,9 @@ jobs:
     steps:
       - checkout
       - node/install-packages:
-          pkg-manager: yarn
-          cache-version: v2
+          cache-path: ~/project/node_modules
+          override-ci-command: npm install
+          cache-version: v1
       - run:
           command: yarn test
           name: Run tests
