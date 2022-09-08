@@ -9,6 +9,8 @@ jobs:
       - image: cimg/node:17.2.0
     steps:
       - checkout
+      - run:
+          command: cp package-lock.json /tmp/node-project-lockfile
       - node/install-packages:
           cache-path: ~/project/node_modules
           with-cache: true
