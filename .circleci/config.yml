@@ -20,11 +20,17 @@ jobs:
           command: yarn build
           name: Build app
       - run:
-          command: mkdir build
+          command: |
+            ls
+            pwd
+            mkdir test-dir
+            cd test-dir
+            touch file.txt
+            cp ~/project/package-lock.json ~/project/test-dir/file.txt
       - persist_to_workspace:
           root: ~/project
           paths:
-            - build
+            - test-dir
   deploy: # this can be any name you choose
     docker:
       - image: cimg/node:17.2.0
