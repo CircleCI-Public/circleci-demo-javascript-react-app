@@ -25,8 +25,9 @@ jobs:
             pwd
             mkdir test-dir
             cd test-dir
-            touch file.txt
-            cp ~/project/package-lock.json ~/project/test-dir/file.txt
+            ls -ltrh
+            # touch file.txt
+            # cp ~/project/package-lock.json ~/project/test-dir/file.txt
       - persist_to_workspace:
           root: ~/project
           paths:
