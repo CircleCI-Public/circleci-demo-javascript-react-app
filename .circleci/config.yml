@@ -3,18 +3,20 @@ version: 2.1
 # specify this dummy command
 commands:
   empty:
-    steps:
-      - checkout
-jobs:
-  build:
     parameters:
       after-deps:
         type: steps
         default: []
+    steps: 
+      - steps: << parameters.after-deps >>
+
+jobs:
+  build:
     docker:
       - image: cimg/base:edge
     steps:
-      - checkout
+      - empty:
+          after-deps: checkout
       - run: echo "This is before the conditional step"
       - run: echo "<< parameters.after-deps >>"
       - when:
@@ -23,7 +25,10 @@ jobs:
           steps:
             - run: echo "No steps provided"
       - run: echo '<< parameters.after-deps >>'
+
 workflows:
   workflow:
     jobs:
-      - build
+      - build: 
+          after-deps:
+            - checkout
