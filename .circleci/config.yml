@@ -14,18 +14,16 @@ jobs:
   build:
     docker:
       - image: cimg/base:edge
-    steps:
+    steps: 
       - empty:
           after-deps: 
             - checkout
       - run: echo "This is before the conditional step"
-      - run: echo "<< parameters.after-deps >>"
       # - when:
       #     condition: 
       #       equal: ["[(\"checkout\")]", "<< parameters.after-deps >>"]
       #     steps:
       #       - run: echo "No steps provided"
-      - run: echo '<< parameters.after-deps >>'
 
 workflows:
   workflow:
