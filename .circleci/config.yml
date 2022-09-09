@@ -3,7 +3,7 @@ version: 2.1
 parameters:
   should-run:
     type: string
-    default: yes
+    default: "yes"
 # specify this dummy command
 commands:
   empty:
