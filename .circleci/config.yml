@@ -17,7 +17,7 @@ commands:
           steps: 
             - run: 
                 command: |
-                  exit 1
+                  circleci-agent step halt
       - steps: << parameters.after-deps >>
 
 jobs:
