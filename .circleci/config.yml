@@ -1,17 +1,23 @@
 version: 2.1
 
-parameters:
-  should-run:
-    type: string
-    default: "yes"
 # specify this dummy command
+
 commands:
   empty:
     parameters:
       after-deps:
         type: steps
         default: []
+      should-run:
+        type: string
+        default: "yes"
     steps: 
+      - when: 
+          condition: << parameters.should-run >>, "yes"
+          steps: 
+            - run: 
+                command: |
+                  exit 0
       - steps: << parameters.after-deps >>
 
 jobs:
@@ -21,12 +27,6 @@ jobs:
     steps: 
       - empty:
           after-deps: 
-            - when: 
-                condition: << parameters.should-run >>, "yes"
-                steps: 
-                  - run: 
-                      command: |
-                        exit 0
             - checkout
       - run: echo "This is before the conditional step"
       # - when:
