@@ -1,41 +1,51 @@
 version: 2.1
 
-# specify this dummy command
+orbs:
+  continuation: circleci/continuation@0.3.1
+  
+setup: true
 
 commands:
-  empty:
+  check-pr:
+    description: "Run API depending on branch"
     parameters:
-      after-deps:
-        type: steps
-        default: []
-      should-run:
+      head:
         type: string
-        default: "yes"
-    steps: 
+      base:
+        type: string
+      run:
+        type: string
+    steps:
       - when: 
-          condition: << parameters.should-run >>, "yes"
+          condition:
+            equal: [ << parameters.head >>, << pipeline.git.branch >> ]
           steps: 
-            - run: 
+            - run:
+                name: Check Pull Request from << parameters.head >> to << parameters.base >>
                 command: |
-                  circleci-agent step halt
-      - steps: << parameters.after-deps >>
+                  if [ -n $CIRCLE_PULL_REQUEST ]; then
+                    pr=$(echo https://api.github.com/repos/${CIRCLE_PULL_REQUEST:19} | sed "s/\/pull\//\/pulls\//")
+
+                    base=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" $pr | jq '.base.ref')
+
+                    if [[ '"<< parameters.base >>"' = "$base" ]]; then
+                      << parameters.run >>
+                    fi
+                  fi
 
 jobs:
   build:
     docker:
-      - image: cimg/base:edge
+      - image: cimg/node:edge
     steps: 
-      - empty:
-          after-deps: 
-            - checkout
-      - run: echo "This is before the conditional step"
-      # - when:
-      #     condition: 
-      #       equal: ["[(\"checkout\")]", "<< parameters.after-deps >>"]
-      #     steps:
-      #       - run: echo "No steps provided"
+      - check-pr:
+          base: staging
+          head: dev
+          run: |
+              echo "hello world!"
+              # implement features here!
 
 workflows:
-  workflow:
+  workflow1:
     jobs:
       - build
