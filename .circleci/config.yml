@@ -2,23 +2,23 @@ version: 2.1
 
 # specify this dummy command
 
-commands:
-  empty:
-    parameters:
-      after-deps:
-        type: steps
-        default: []
-      should-run:
-        type: string
-        default: "yes"
-    steps: 
-      - when: 
-          condition: << parameters.should-run >>, "yes"
-          steps: 
-            - run: 
-                command: |
-                  circleci-agent step halt
-      - steps: << parameters.after-deps >>
+# commands:
+#   empty:
+#     parameters:
+#       after-deps:
+#         type: steps
+#         default: []
+#       should-run:
+#         type: string
+#         default: "yes"
+#     steps: 
+#       - when: 
+#           condition: << parameters.should-run >>, "yes"
+#           steps: 
+#             - run: 
+#                 command: |
+#                   circleci-agent step halt
+#       - steps: << parameters.after-deps >>
 
 jobs:
   build:
@@ -26,9 +26,9 @@ jobs:
       - image: cimg/base:edge
       
     steps: 
-      - empty:
-          after-deps: 
-            - checkout
+      # - empty:
+      #     after-deps: 
+      #       - checkout
       - run: echo "This is before the conditional step"
       # - when:
       #     condition: 
@@ -40,3 +40,5 @@ workflows:
   workflow:
     jobs:
       - build
+
+# VS Code Extension Version: 1.0.0
