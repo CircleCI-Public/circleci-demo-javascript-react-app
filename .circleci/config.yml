@@ -1,44 +1,21 @@
 version: 2.1
 
-# specify this dummy command
-
-# commands:
-#   empty:
-#     parameters:
-#       after-deps:
-#         type: steps
-#         default: []
-#       should-run:
-#         type: string
-#         default: "yes"
-#     steps: 
-#       - when: 
-#           condition: << parameters.should-run >>, "yes"
-#           steps: 
-#             - run: 
-#                 command: |
-#                   circleci-agent step halt
-#       - steps: << parameters.after-deps >>
+parameters:
+  branch:
+    type: string
+    default: "main"
 
 jobs:
   build:
     docker:
-      - image: cimg/base:edge
-      
-    steps: 
-      # - empty:
-      #     after-deps: 
-      #       - checkout
-      - run: echo "This is before the conditional step"
-      # - when:
-      #     condition: 
-      #       equal: ["[(\"checkout\")]", "<< parameters.after-deps >>"]
-      #     steps:
-      #       - run: echo "No steps provided"
+      - image: cimg/base:2021.07
+    steps:
+      - checkout
+      - run: echo "<< pipeline.git.branch >>"
 
 workflows:
-  workflow:
+  workflow1:
     jobs:
-      - build
-
-# VS Code Extension Version: 1.0.0
+      - build:
+          context:
+            - << pipeline.git.branch >>
