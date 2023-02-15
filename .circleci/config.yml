@@ -1,17 +1,17 @@
 version: 2.1
 
-workflow_condition1: &workflow_condition1
-  when:
-    and:
-      - or:
-        - equal: [ staging, << pipeline.parameters.environment >> ]
-        - equal: [ production, << pipeline.parameters.environment >> ]
-        - not:
-            equal: [ "", << pipeline.parameters.imageName >> ]
-        - not:
-            equal: [ "", << pipeline.parameters.imageTag >> ]
-        - not:
-            equal: [ "", << pipeline.parameters.serviceName >> ]
+# workflow_condition1: &workflow_condition1
+#   when:
+#     and:
+#       - or:
+#         - equal: [ staging, << pipeline.parameters.environment >> ]
+#         - equal: [ production, << pipeline.parameters.environment >> ]
+        # - not:
+        #     equal: [ "", << pipeline.parameters.imageName >> ]
+        # - not:
+        #     equal: [ "", << pipeline.parameters.imageTag >> ]
+        # - not:
+        #     equal: [ "", << pipeline.parameters.serviceName >> ]
 jobs:
   build:
     docker:
@@ -22,6 +22,6 @@ jobs:
 
 workflows:
   workflow1:
-    <<: *workflow_condition1
+    # <<: *workflow_condition1
     jobs:
       - build
