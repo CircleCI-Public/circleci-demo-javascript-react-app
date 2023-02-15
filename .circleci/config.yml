@@ -1,20 +1,28 @@
 version: 2.1
 
-parameters:
-  branch:
-    type: string
-    default: "main"
-
+workflow_condition1: &workflow_condition1
+  when:
+    and:
+      - or:
+        - equal: [ staging, << pipeline.parameters.environment >> ]
+        - equal: [ production, << pipeline.parameters.environment >> ]
+        - not:
+            equal: [ "", << pipeline.parameters.imageName >> ]
+        - not:
+            equal: [ "", << pipeline.parameters.imageTag >> ]
+        - not:
+            equal: [ "", << pipeline.parameters.serviceName >> ]
 jobs:
   build:
     docker:
       - image: cimg/base:2021.07
     steps:
       - checkout
-      - run: echo "<< pipeline.git.branch >>"
+      - run: echo "<< pipeline.parameters.imageName >>"
 
 workflows:
   workflow1:
+    <<: *workflow_condition1
     jobs:
       - build:
           context:
