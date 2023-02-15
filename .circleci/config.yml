@@ -18,7 +18,7 @@ jobs:
       - image: cimg/base:2021.07
     steps:
       - checkout
-      - run: echo "<< pipeline.parameters.imageName >>"
+      - run: echo "hi"
 
 workflows:
   workflow1:
