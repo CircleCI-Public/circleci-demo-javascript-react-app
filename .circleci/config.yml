@@ -24,6 +24,4 @@ workflows:
   workflow1:
     <<: *workflow_condition1
     jobs:
-      - build:
-          context:
-            - << pipeline.git.branch >>
+      - build
