@@ -1,27 +1,35 @@
 version: 2.1
 
-# workflow_condition1: &workflow_condition1
-#   when:
-#     and:
-#       - or:
-#         - equal: [ staging, << pipeline.parameters.environment >> ]
-#         - equal: [ production, << pipeline.parameters.environment >> ]
-        # - not:
-        #     equal: [ "", << pipeline.parameters.imageName >> ]
-        # - not:
-        #     equal: [ "", << pipeline.parameters.imageTag >> ]
-        # - not:
-        #     equal: [ "", << pipeline.parameters.serviceName >> ]
-jobs:
-  build:
+orbs:
+  node: circleci/node@5.1.0
+  cxflow: checkmarx-ts/cxflow@1.0.6
+executors:
+  cxflow:
     docker:
-      - image: cimg/base:2021.07
-    steps:
-      - checkout
-      - run: echo "hi"
-
+      - image: checkmarx/cx-flow:latest
+    resource_class: macos.m1.large.gen1
+    environment:
+      JAVA_OPTS: -Xmx4g
+jobs:
+  checkmarx:
+      executor: cxflow
+      steps:
+        - checkout
+        - cxflow/scan:
+            team: /CxServer/DSG/Mobile/Android/Start-Right
+            project: dsg-mobile-android-startright
+            scan-configuration: High and Medium and Low
+            version: ${CHECKMARX_VERSION}
+            incremental: true
+            no-output-timeout: 30m
+            break: false
+            preset: Mobile
+            params: --checkmarx.scan-queuing=true
+      docker:
+        - image: checkmarx/cx-flow:latest
+      environment:
+        _JAVA_OPTIONS: -Xmx3g  
 workflows:
-  workflow1:
-    # <<: *workflow_condition1
-    jobs:
-      - build
+    workflow1:
+      jobs:
+        - checkmarx
