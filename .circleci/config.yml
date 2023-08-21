@@ -5,8 +5,8 @@ orbs:
   cxflow: checkmarx-ts/cxflow@1.0.6
 executors:
   cxflow:
-    docker:
-      - image: checkmarx/cx-flow:latest
+    macos:
+      xcode: "15.0.0"
     resource_class: macos.m1.large.gen1
     environment:
       JAVA_OPTS: -Xmx4g
