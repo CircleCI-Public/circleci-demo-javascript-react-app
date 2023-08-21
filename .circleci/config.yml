@@ -13,8 +13,10 @@ orbs:
 #       JAVA_OPTS: -Xmx4g
 jobs:
   checkmarx:
-    macos:
-        xcode: "14.2.0"
+    docker:
+      - image: checkmarx/cx-flow:latest
+    # macos:
+    #     xcode: "14.2.0"
     resource_class: macos.m1.large.gen1
     steps:
       - checkout
@@ -28,8 +30,6 @@ jobs:
           break: false
           preset: Mobile
           params: --checkmarx.scan-queuing=true
-    # docker:
-    #   - image: checkmarx/cx-flow:latest
     environment:
       _JAVA_OPTIONS: -Xmx3g  
 workflows:
