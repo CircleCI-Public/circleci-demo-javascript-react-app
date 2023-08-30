@@ -34,13 +34,12 @@ jobs:
     #     type: string
     #   aws_resource_name_prefix:
         # type: string
-    docker:
-      - image: cimg/base:stable
+    executor: node/default
     # environment:
     #   AWS_RESOURCE_NAME_PREFIX: << parameters.aws_resource_name_prefix >>
     steps:
       - checkout
-      # - setup_remote_docker
+      - setup_remote_docker
       # - run:
       #     name: Install dependencies
       #     command: |
