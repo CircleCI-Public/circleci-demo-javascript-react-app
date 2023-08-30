@@ -1,38 +1,88 @@
 version: 2.1
 
 orbs:
-  # node: circleci/node@5.1.0
-  cxflow: checkmarx-ts/cxflow@1.0.6
-# executors:
-#   cxflow:
-#     executor:
-#       macos:
-#         xcode: "14.2.0"
-#     resource_class: macos.m1.large.gen1
-#     environment:
-#       JAVA_OPTS: -Xmx4g
+  aws-cli: circleci/aws-cli@4.1.0
+  aws-ecr: circleci/aws-ecr@9.0.0
+  aws-eks: circleci/aws-eks@2.2.0
+  node: circleci/node@5.1.0
+  kubernetes: circleci/kubernetes@1.3.1
+
+# parameters:
+#   k8_cluster_namespace:
+#     type: string
+#     default: universe1
+#   k8_cluster_name:
+#     type: string
+#     default: universe-2
+#   k8_app_name_staging:
+#     type: string
+#     default: staging-universe-crm
+#   k8_app_name_develop:
+#     type: string
+#     default: develop-universe-crm
+#   aws_resource_name_prefix_staging:
+#     type: string
+#     default: staging-universe-crm-api
+#   aws_resource_name_prefix_develop:
+#     type: string
+#     default: develop-universe-crm-api
+
 jobs:
-  checkmarx:
+  build_and_push_image:
+    # parameters:
+    #   dockerfile-name:
+    #     type: string
+    #   aws_resource_name_prefix:
+        # type: string
     docker:
-      - image: checkmarx/cx-flow:latest
-    # macos:
-    #     xcode: "14.2.0"
-    resource_class: macos.m1.large.gen1
+      - image: cimg/base:stable
+    # environment:
+    #   AWS_RESOURCE_NAME_PREFIX: << parameters.aws_resource_name_prefix >>
     steps:
       - checkout
-      - cxflow/scan:
-          team: /CxServer/DSG/Mobile/Android/Start-Right
-          project: dsg-mobile-android-startright
-          scan-configuration: High and Medium and Low
-          version: ${CHECKMARX_VERSION}
-          incremental: true
-          no-output-timeout: 30m
-          break: false
-          preset: Mobile
-          params: --checkmarx.scan-queuing=true
-    environment:
-      _JAVA_OPTIONS: -Xmx3g  
+      # - setup_remote_docker
+      # - run:
+      #     name: Install dependencies
+      #     command: |
+      #       apk add bash && apk add rsync
+      #       pip install --upgrade setuptools
+      #       apk add --update nodejs npm
+      # - run:
+      #     name: Install cmake
+      #     command: |
+      #       apk add cmake
+      # - run:
+      #     name: Install pytype and awscli
+      #     command: |
+      #       pip install pytype awscli
+      # - run:
+      #     name: Login to AWS ECR
+      #     command: |
+      #       # Login to AWS ECR
+      #       echo "Logging in to AWS ECR..."
+      #       $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+      # - run:
+      #     name: Build docker image
+      #     command: |
+      #       bash dockerfiles/<< parameters.dockerfile-name >>/copy-files.sh
+      #       cd dockerfiles/<< parameters.dockerfile-name >>
+      #       echo "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$AWS_RESOURCE_NAME_PREFIX:latest"
+      #       echo $AWS_ACCOUNT_ID
+      #       echo $AWS_DEFAULT_REGION
+      #       echo $AWS_RESOURCE_NAME_PREFIX
+      #       echo "Building As Latest"
+      #       # Build set a default tag
+      #       docker build -t $AWS_RESOURCE_NAME_PREFIX:latest .
+      #       # tag the image to ECR format
+      #       docker tag $AWS_RESOURCE_NAME_PREFIX:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$AWS_RESOURCE_NAME_PREFIX:latest
+      # - run:
+      #     name: Push docker image to ECR
+      #     command: |
+      #       # Push image to AWS ECR
+      #       echo "Pushing docker image"
+      #       docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$AWS_RESOURCE_NAME_PREFIX:latest
+
 workflows:
     workflow1:
       jobs:
-        - checkmarx
+        - build_and_push_image
