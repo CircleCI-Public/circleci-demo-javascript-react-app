@@ -37,6 +37,7 @@ jobs:
     executor: node/default
     # environment:
     #   AWS_RESOURCE_NAME_PREFIX: << parameters.aws_resource_name_prefix >>
+    working_directory: ~/project/tmp
     steps:
       - checkout
       # - setup_remote_docker
@@ -80,10 +81,6 @@ jobs:
       #       # Push image to AWS ECR
       #       echo "Pushing docker image"
       #       docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$AWS_RESOURCE_NAME_PREFIX:latest
-
-        # Attach the workspace
-      - attach_workspace:
-          at: /tmp
 
       - run:
           name: Use feature branch name to create multi-dev or if on master push straight to dev
