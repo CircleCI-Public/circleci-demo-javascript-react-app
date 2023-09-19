@@ -46,10 +46,10 @@ jobs:
       #       apk add bash && apk add rsync
       #       pip install --upgrade setuptools
       #       apk add --update nodejs npm
-      # - run:
-      #     name: Install cmake
-      #     command: |
-      #       apk add cmake
+      - run:
+          name: Install rsync
+          command: |
+            sudo apt install rsync
       # - run:
       #     name: Install pytype and awscli
       #     command: |
