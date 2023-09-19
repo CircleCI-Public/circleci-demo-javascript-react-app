@@ -39,7 +39,7 @@ jobs:
     #   AWS_RESOURCE_NAME_PREFIX: << parameters.aws_resource_name_prefix >>
     steps:
       - checkout
-      - setup_remote_docker
+      # - setup_remote_docker
       # - run:
       #     name: Install dependencies
       #     command: |
@@ -85,11 +85,11 @@ jobs:
       - attach_workspace:
           at: /tmp
 
-      - run:
-          # Set TERMINUS_ENV and related environment variables.
-          # https://github.com/pantheon-systems/docker-build-tools-ci/blob/6.x/scripts/set-environment
-          name: setup-environment-vars
-          command: /build-tools-ci/scripts/set-environment
+      # - run:
+      #     # Set TERMINUS_ENV and related environment variables.
+      #     # https://github.com/pantheon-systems/docker-build-tools-ci/blob/6.x/scripts/set-environment
+      #     name: setup-environment-vars
+      #     command: /build-tools-ci/scripts/set-environment
 
       - run:
           name: Use feature branch name to create multi-dev or if on master push straight to dev
