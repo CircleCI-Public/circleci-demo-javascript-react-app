@@ -98,7 +98,7 @@ jobs:
       # Rsync the build artifact pieces web directory
       - run:
           name: sync build artifact
-          command: rsync -avz /tmp/web /tmp/vendor /tmp/drush .
+          command: sudo rsync -avz /tmp/web /tmp/vendor /tmp/drush .
 workflows:
     workflow1:
       jobs:
