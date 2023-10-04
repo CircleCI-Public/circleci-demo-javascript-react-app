@@ -8,11 +8,11 @@ parameters:
   skipSystemTests:
     description: if set to true will not build the c++ system tests
     type: boolean
-    default: false
+    default: true
   updateTranslation:
     description: if set to true will update the translation files
     type: boolean
-    default: false
+    default: true
 
 
 jobs:
@@ -80,8 +80,8 @@ workflows:
   updateTranslation_workflow:
     when: # All must be true to trigger
       and:
-        - equal: [ false, <<pipeline.parameters.skipUnitTests>> ]
-        - equal: [ false, <<pipeline.parameters.skipSystemTests>> ]
+        - equal: [ true, <<pipeline.parameters.skipUnitTests>> ]
+        - equal: [ true, <<pipeline.parameters.skipSystemTests>> ]
         - equal: [ true, <<pipeline.parameters.updateTranslation>> ]
     jobs:
     - updateTranslation_job
