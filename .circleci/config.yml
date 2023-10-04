@@ -47,7 +47,8 @@ workflows:
     when: # All must be true to trigger
       and:
         - equal: [ false, <<pipeline.parameters.skipUnitTests>> ]
-        - not: <<pipeline.parameters.skipSystemTests>>
+        - equal: [ true, <<pipeline.parameters.skipSystemTests>> ]
+        - equal: [ false, <<pipeline.parameters.updateTranslation>> ]
     jobs:
     - build_cpp_unit_tests
   artefacts_build_only_workflow: 
