@@ -16,27 +16,31 @@ parameters:
 
 
 jobs:
-  build_cpp_unit_tests:
+  Prep1:
     docker:
       - image: cimg/base:edge
     steps:
       - checkout
       - run: echo "This was triggered by << pipeline.trigger_source >>"
-  artefacts_build_only_job:
+  Prep2:
     docker:
       - image: cimg/base:edge
     steps:
       - checkout
       - run: echo "This was triggered by << pipeline.trigger_source >>"
-  system_tests_job:
+  Prep3:
     docker:
       - image: cimg/base:edge
     steps:
       - checkout
       - run: echo "This was triggered by << pipeline.trigger_source >>"
-  updateTranslation_job:
+  release:
     docker:
       - image: cimg/base:edge
+    parameters:
+      release_type:
+        type: string
+        default: "release"
     steps:
       - checkout
       - run: echo "This was triggered by << pipeline.trigger_source >>"
@@ -44,44 +48,16 @@ jobs:
 
 workflows:
   unit_tests_workflow: 
-    when: # All must be true to trigger
-      and:
-        - equal: [ false, <<pipeline.parameters.skipUnitTests>> ]
-        - equal: [ true, <<pipeline.parameters.skipSystemTests>> ]
-        - equal: [ false, <<pipeline.parameters.updateTranslation>> ]
     jobs:
-    - build_cpp_unit_tests
-  artefacts_build_only_workflow: 
-    when: # All must be true to trigger
-      and:
-        - equal: [ true, <<pipeline.parameters.skipUnitTests>> ]
-        - equal: [ true, <<pipeline.parameters.skipSystemTests>> ]
-        - equal: [ false, <<pipeline.parameters.updateTranslation>> ]
-    jobs:
-    - artefacts_build_only_job
-  artefacts_build_and_unittest:
-    when: # All must be true to trigger
-      and:
-        - equal: [ false, <<pipeline.parameters.skipUnitTests>> ]
-        - equal: [ true, <<pipeline.parameters.skipSystemTests>> ]
-        - equal: [ false, <<pipeline.parameters.updateTranslation>> ]
-    jobs:
-    - build_cpp_unit_tests
-    - artefacts_build_only_job
-  artefacts_build_and_systemtest:
-    when:  # All must be true to trigger
-      and:
-        - equal: [ true, <<pipeline.parameters.skipUnitTests>> ]
-        - equal: [ false, <<pipeline.parameters.skipSystemTests>> ]
-        - equal: [ false, <<pipeline.parameters.updateTranslation>> ]
-    jobs:
-    - artefacts_build_only_job
-    - system_tests_job
-  updateTranslation_workflow:
-    when: # All must be true to trigger
-      and:
-        - equal: [ true, <<pipeline.parameters.skipUnitTests>> ]
-        - equal: [ true, <<pipeline.parameters.skipSystemTests>> ]
-        - equal: [ true, <<pipeline.parameters.updateTranslation>> ]
-    jobs:
-    - updateTranslation_job
+    - Prep1
+    - Prep3
+    - release:  
+        name: build_and_release_npm_package
+        release_type: "release"
+        filters:
+          tags:
+            only: /^v.*/
+        requires:
+          - Prep1
+          - Prep2
+          - Prep3
