@@ -4,7 +4,7 @@ parameters:
   skipUnitTests:
     description: if set to true will not build the c++ unit tests
     type: boolean
-    default: true
+    default: false
   skipSystemTests:
     description: if set to true will not build the c++ system tests
     type: boolean
@@ -12,7 +12,7 @@ parameters:
   updateTranslation:
     description: if set to true will update the translation files
     type: boolean
-    default: true
+    default: false
 
 
 jobs:
@@ -34,32 +34,49 @@ jobs:
     steps:
       - checkout
       - run: echo "This was triggered by << pipeline.trigger_source >>"
+  updateTranslation_job:
+    docker:
+      - image: cimg/base:edge
+    steps:
+      - checkout
+      - run: echo "This was triggered by << pipeline.trigger_source >>"
 
 
 workflows:
   unit_tests_workflow: 
-    when:
+    when: # All must be true to trigger
       and:
-        - not: <<pipeline.parameters.skipUnitTests>>
+        - equal: [ false, <<pipeline.parameters.skipUnitTests>> ]
+        - not: <<pipeline.parameters.skipSystemTests>>
     jobs:
     - build_cpp_unit_tests
   artefacts_build_only_workflow: 
-    when:
+    when: # All must be true to trigger
       and:
         - not: <<pipeline.parameters.skipUnitTests>>
+        - not: <<pipeline.parameters.skipSystemTests>>
     jobs:
     - artefacts_build_only_job
   artefacts_build_and_unittest:
-    when:
+    when: # All must be true to trigger
       and:
         - not: <<pipeline.parameters.skipUnitTests>>
+        - not: <<pipeline.parameters.skipSystemTests>>
     jobs:
     - build_cpp_unit_tests
     - artefacts_build_only_job
   artefacts_build_and_systemtest:
-    when:
+    when:  # All must be true to trigger
       and:
         - not: <<pipeline.parameters.skipSystemTests>>
     jobs:
     - artefacts_build_only_job
     - system_tests_job
+  updateTranslation_workflow:
+    when: # All must be true to trigger
+      and:
+        - equal: [ <<pipeline.parameters.updateTranslation>>, true ]
+        - not: <<pipeline.parameters.skipUnitTests>>
+        - not: <<pipeline.parameters.skipSystemTests>>
+    jobs:
+    - updateTranslation_job
