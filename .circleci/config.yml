@@ -8,10 +8,6 @@ parameters:
 
 jobs:
   build:
-    parameters:
-      skip:
-        type: boolean
-        default: false
     docker:
       - image: cimg/base:edge
     steps:
@@ -20,6 +16,8 @@ jobs:
       
 workflows:
   commit:
-   jobs:
-     - build:
-         skip: << pipeline.parameters.skipUnitTests >>
+    when:
+      and:
+        - not: <<pipeline.parameters.skipUnitTests>>
+    jobs:
+    - build
