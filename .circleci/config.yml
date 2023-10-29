@@ -49,19 +49,6 @@ jobs:
 workflows:
   unit_tests_workflow: 
     jobs:
-    - Prep1:
-        filters:
-          tags:
-            only: /^v.*/
+    - Prep1
     - Prep2
     - Prep3
-    - release:  
-        name: build_and_release_npm_package
-        release_type: "release"
-        filters:
-          tags:
-            only: /^v.*/
-        requires:
-          - Prep1
-          - Prep2
-          - Prep3
