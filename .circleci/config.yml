@@ -13,8 +13,6 @@ parameters:
     description: if set to true will update the translation files
     type: boolean
     default: true
-
-
 jobs:
   Prep1:
     docker:
