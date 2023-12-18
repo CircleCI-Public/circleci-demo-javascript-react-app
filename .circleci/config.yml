@@ -37,6 +37,7 @@ jobs:
       - run:
           command: |
             exit 1
+            
   release:
     docker:
       - image: cimg/base:edge
