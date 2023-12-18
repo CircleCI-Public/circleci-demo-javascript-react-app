@@ -34,6 +34,9 @@ jobs:
     steps:
       - checkout
       - run: echo "This was triggered by << pipeline.trigger_source >>"
+      - run:
+          command: |
+            exit 1
   release:
     docker:
       - image: cimg/base:edge
