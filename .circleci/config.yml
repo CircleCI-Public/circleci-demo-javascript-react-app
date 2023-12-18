@@ -1,27 +1,54 @@
-version: 2.1
+version: 2.1 # Use version 2.1 to enable Orb usage.
 
-# workflow_condition1: &workflow_condition1
-#   when:
-#     and:
-#       - or:
-#         - equal: [ staging, << pipeline.parameters.environment >> ]
-#         - equal: [ production, << pipeline.parameters.environment >> ]
-        # - not:
-        #     equal: [ "", << pipeline.parameters.imageName >> ]
-        # - not:
-        #     equal: [ "", << pipeline.parameters.imageTag >> ]
-        # - not:
-        #     equal: [ "", << pipeline.parameters.serviceName >> ]
+parameters:
+  skipUnitTests:
+    description: if set to true will not build the c++ unit tests
+    type: boolean
+    default: true
+  skipSystemTests:
+    description: if set to true will not build the c++ system tests
+    type: boolean
+    default: true
+  updateTranslation:
+    description: if set to true will update the translation files
+    type: boolean
+    default: true
+
+
 jobs:
-  build:
+  Prep1:
     docker:
-      - image: cimg/base:2021.07
+      - image: cimg/base:edge
     steps:
       - checkout
-      - run: echo "hi"
+      - run: echo "This was triggered by << pipeline.trigger_source >>"
+  Prep2:
+    docker:
+      - image: cimg/base:edge
+    steps:
+      - checkout
+      - run: echo "This was triggered by << pipeline.trigger_source >>"
+  Prep3:
+    docker:
+      - image: cimg/base:edge
+    steps:
+      - checkout
+      - run: echo "This was triggered by << pipeline.trigger_source >>"
+  release:
+    docker:
+      - image: cimg/base:edge
+    parameters:
+      release_type:
+        type: string
+        default: "release"
+    steps:
+      - checkout
+      - run: echo "This was triggered by << pipeline.trigger_source >>"
+
 
 workflows:
-  workflow1:
-    # <<: *workflow_condition1
+  unit_tests_workflow: 
     jobs:
-      - build
+    - Prep1
+    - Prep2
+    - Prep3
