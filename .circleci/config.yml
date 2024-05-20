@@ -4,6 +4,14 @@ orbs:
   heroku: circleci/heroku@1.2.6
 
 jobs:
+  super-build:
+    docker:
+      - image: cimg/base:2023.03
+    steps:
+      - checkout
+      - run: echo "this is the build job"
+      - run: set
+      - run: sleep 1000
   build_and_test:
     docker:
       - image: cimg/node:17.2.0
@@ -34,6 +42,7 @@ workflows:
   on_commit:
     jobs:
       - build_and_test
+      - super-build
       # Follow instructions here to authenticate git for Heroku: https://devcenter.heroku.com/articles/git#http-git-authentication
       # The following code may be uncommented, onnce HEROKU_API_KEY & HEROKU_APP_NAME environemnt variables are present
       # Read more: https://circleci.com/docs/2.0/env-vars/
