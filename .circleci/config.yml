@@ -1,19 +1,29 @@
 version: 2.1
 orbs:
-  node: circleci/node@4.7.0
+  node: circleci/node@5.1.0
   heroku: circleci/heroku@1.2.6
 
 jobs:
-  build_and_test:
+  test:
     docker:
-      - image: cimg/node:17.2.0
+      - image: cimg/node:18.20.0
     steps:
       - checkout
       - node/install-packages:
           pkg-manager: yarn
+          override-ci-command: yarn install --frozen-lockfile
       - run:
           command: yarn test
           name: Run tests
+
+  build:
+    docker:
+      - image: cimg/node:18.20.0
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: yarn
+          override-ci-command: yarn install --frozen-lockfile
       - run:
           command: yarn build
           name: Build app
@@ -21,44 +31,72 @@ jobs:
           root: ~/project
           paths:
             - .
-  deploy: # this can be any name you choose
+
+  deploy:
     docker:
-      - image: cimg/node:17.2.0
+      - image: cimg/node:18.20.0
     steps:
       - attach_workspace:
           at: ~/project
-      - heroku/deploy-via-git: 
-          force: true # force push when pushing to the heroku remote, see: https://devcenter.heroku.com/articles/git
+      - heroku/deploy-via-git:
+          force: true
 
 workflows:
-  on_commit:
+  version: 2
+  
+  # Workflow for pull requests and feature branches
+  test-workflow:
     jobs:
-      - build_and_test
-      # Follow instructions here to authenticate git for Heroku: https://devcenter.heroku.com/articles/git#http-git-authentication
-      # The following code may be uncommented, onnce HEROKU_API_KEY & HEROKU_APP_NAME environemnt variables are present
-      # Read more: https://circleci.com/docs/2.0/env-vars/
+      - test:
+          filters:
+            branches:
+              ignore: 
+                - main
+                - master
+
+  # Workflow for main branch
+  main-workflow:
+    jobs:
+      - test:
+          filters:
+            branches:
+              only: 
+                - main
+                - master
+      - build:
+          requires:
+            - test
+          filters:
+            branches:
+              only: 
+                - main
+                - master
+      # Uncomment when Heroku credentials are set up
       # - deploy:
       #     requires:
-      #       - build_and_test # only deploy if the build_and_test job has completed
+      #       - build
       #     filters:
       #       branches:
-      #         only: master # only deploy when on main/master
+      #         only: 
+      #           - main
+      #           - master
+
+  # Nightly build workflow
   nightly:
     triggers:
       - schedule:
-          cron: "0 0 * * *"       
+          cron: "0 0 * * *"
           filters:
             branches:
               only:
+                - main
                 - master
     jobs:
-      - build_and_test
-      # Follow instructions here to authenticate git for Heroku: https://devcenter.heroku.com/articles/git#http-git-authentication
-      # The following code may be uncommented, onnce HEROKU_API_KEY & HEROKU_APP_NAME environemnt variables are present
-      # Read more: https://circleci.com/docs/2.0/env-vars/
+      - test
+      - build:
+          requires:
+            - test
+      # Uncomment when Heroku credentials are set up
       # - deploy:
       #     requires:
-      #       - build_and_test # only deploy if the build_and_test job has completed
-      #     filters:
-      #       branches:
-      #         only: master # only deploy when on main/master
+      #       - build
