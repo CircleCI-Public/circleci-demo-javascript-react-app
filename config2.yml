@@ -1,0 +1,34 @@
+orbs:
+  circle-node: circleci/node@4.7.0
+  docker: circleci/docker@2.0.1
+  continuation: circleci/continuation@0.2.0
+
+default-executor: &default-executor
+  executor:
+    name: 'circle-node/default'
+
+runner-executor: &runner-executor
+  machine: true
+  resource_class: jkg-runner/jkg-resource-class
+
+version: 2.1
+
+setup: true
+
+jobs:
+  checking-branch:
+    <<: *default-executor
+    steps:
+      - checkout
+      - run: 
+          command: |
+            if [ << pipeline.git.branch >> != "main" ]; then
+              exit 1 
+            fi
+      - continuation/continue:
+          configuration_path: config2.yml  
+workflows:
+  run-if-main:
+    jobs:
+      - checking-branch
+           

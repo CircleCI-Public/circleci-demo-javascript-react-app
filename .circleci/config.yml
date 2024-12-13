@@ -1,38 +1,102 @@
-version: 2 # use CircleCI 2.0
+version: 2.1
+orbs:
+  node: circleci/node@5.1.0
+  heroku: circleci/heroku@1.2.6
+
 jobs:
+  test:
+    docker:
+      - image: cimg/node:18.20.0
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: yarn
+          override-ci-command: yarn install --frozen-lockfile
+      - run:
+          command: yarn test
+          name: Run tests
+
   build:
     docker:
-      - image: circleci/node:10
+      - image: cimg/node:18.20.0
     steps:
-      - checkout # special step to check out source code to working directory
-
-      - restore_cache: # special step to restore the dependency cache
-          # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
-          keys: 
-            - v1-repo-{{ checksum "package-lock.json" }}
-
+      - checkout
+      - node/install-packages:
+          pkg-manager: yarn
+          override-ci-command: yarn install --frozen-lockfile
       - run:
-          name: Install dependencies with NPM
-          command: npm install # replace with `yarn install` if using yarn
-
-      - save_cache: # special step to save the dependency cache
-          key: v1-repo-{{ checksum "package-lock.json" }}
+          command: yarn build
+          name: Build app
+      - persist_to_workspace:
+          root: ~/project
           paths:
-            - "node_modules"
+            - .
 
-      - run:
-          name: Run tests
-          # Runs jest with "--maxWorkers=2" argument to avoid OOM issues
-          command: npm test # replace with `yarn test` if using yarn
-
-      - store_artifacts: 
-          path: test-results
-
-      - store_test_results:
-          path: test-results
+  deploy:
+    docker:
+      - image: cimg/node:18.20.0
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - heroku/deploy-via-git:
+          force: true
 
 workflows:
   version: 2
-  Build and Test:
+  
+  # Workflow for pull requests and feature branches
+  test-workflow:
     jobs:
-      - build
+      - test:
+          filters:
+            branches:
+              ignore: 
+                - main
+                - master
+
+  # Workflow for main branch
+  main-workflow:
+    jobs:
+      - test:
+          filters:
+            branches:
+              only: 
+                - main
+                - master
+      - build:
+          requires:
+            - test
+          filters:
+            branches:
+              only: 
+                - main
+                - master
+      # Uncomment when Heroku credentials are set up
+      # - deploy:
+      #     requires:
+      #       - build
+      #     filters:
+      #       branches:
+      #         only: 
+      #           - main
+      #           - master
+
+  # Nightly build workflow
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - main
+                - master
+    jobs:
+      - test
+      - build:
+          requires:
+            - test
+      # Uncomment when Heroku credentials are set up
+      # - deploy:
+      #     requires:
+      #       - build
