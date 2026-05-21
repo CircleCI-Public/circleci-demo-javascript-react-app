@@ -1,0 +1,38 @@
+{
+  "commands": [
+    {
+      "name": "install",
+      "run": "npm ci"
+    },
+    {
+      "name": "test",
+      "run": "npm test",
+      "role": "gate",
+      "timeout": 300,
+      "limit": 3
+    }
+  ],
+  "vcs": {
+    "org": "CircleCI-Public",
+    "repo": "circleci-demo-javascript-react-app"
+  },
+  "environment": {
+    "stack": "javascript",
+    "setup": [
+      {
+        "name": "install-node",
+        "command": "curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - && sudo apt-get install -y nodejs"
+      },
+      {
+        "name": "install",
+        "command": "npm install"
+      },
+      {
+        "name": "test",
+        "command": "npm test"
+      }
+    ],
+    "image": "cimg/node",
+    "image_version": "22.11.0"
+  }
+}
