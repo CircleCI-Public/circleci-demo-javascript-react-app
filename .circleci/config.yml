@@ -6,7 +6,7 @@ orbs:
 jobs:
   build_and_test:
     docker:
-      - image: cimg/node:17.2.0
+      - image: cimg/node:20.20.2
     steps:
       - checkout
       - node/install-packages:
@@ -23,7 +23,7 @@ jobs:
             - .
   deploy: # this can be any name you choose
     docker:
-      - image: cimg/node:17.2.0
+      - image: cimg/node:20.20.2
     steps:
       - attach_workspace:
           at: ~/project
