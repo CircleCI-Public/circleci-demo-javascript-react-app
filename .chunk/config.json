@@ -1,0 +1,19 @@
+{
+  "commands": [
+    {
+      "name": "install",
+      "run": "npm ci"
+    },
+    {
+      "name": "test",
+      "run": "yarn test",
+      "role": "gate",
+      "timeout": 300
+    }
+  ],
+  "vcs": {
+    "org": "CircleCI-Public",
+    "repo": "circleci-demo-javascript-react-app"
+  },
+  "orgID": "2dd63740-c14b-4a21-b7f7-e206add7a4d7"
+}
