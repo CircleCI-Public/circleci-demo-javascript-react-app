@@ -1,19 +1,152 @@
-# Quickstart: Demo JavaScript Node.js Reference Project
-We maintain a reference JavaScript Node.js project to show how to build an Express.js app on CircleCI with version: 2.1 configuration:
-[Demo JavaScript Node Project on GitHub](https://github.com/CircleCI-Public/circleci-demo-javascript-react-app)
-[Demo JavaScript Node Project building on CircleCI](https://app.circleci.com/pipelines/github/CircleCI-Public/circleci-demo-javascript-react-app)
+# Software Factory + Chunk Sidecars Workshop
 
-In the project you will find a CircleCI configuration file .circleci/config.yml. This file shows best practice for using version 2.1 config with Node projects.
-Build the Demo JavaScript Node Project Yourself
-A good way to start using CircleCI is to build a project yourself. Here’s how to build the demo project with your own account:
-Fork the project on GitHub to your own account.
-Go to the Add Projects page in the CircleCI application and click the Set Up Project button next to the project you just forked.
-To make changes you can edit the .circleci/config.yml file and make a commit. When you push a commit to GitHub, CircleCI will build and test the project.
+**SF Tech Week hands-on** for [Fine Tuning Your (Software) Factory Settings](https://partiful.com/e/p7wbsI2PqLVgqkW9Qxsw).
 
-# Sample Configuration
-Below is the .circleci/config.yml file in the demo project.
+Goal: adopt **[Chunk sidecars](https://chunk.ai/)** so your agent gets CI-shaped feedback **before** you push — then let **CircleCI** own the outer-loop final exam.
+
+This branch (`workshop/sf-tech-week`) turns the public React demo into a tiny **Software Factory** board (Accuracy · Efficiency · Risk) with one intentional failing test so you can practice the sidecar loop end-to-end.
+
+> Prefer watching once before the room? Here is a longer walkthrough for later (not for playing on stage): [Chunk sidecars demo (YouTube)](https://youtu.be/edyVGWvDQos).
+
+---
+
+## Super-easy path (about 10 minutes)
+
+### 0) Prerequisites
+
+- macOS or Linux with Git
+- Node 20+ (matches CircleCI `cimg/node:20.20.2`)
+- A [CircleCI](https://circleci.com/signup/) account (sidecars are free on every plan, including Free)
+- Optional but recommended: [Claude Code](https://claude.ai/code), [Cursor](https://cursor.com/), or another agent that can run the `chunk-sidecar` skill
+
+### 1) Clone this workshop branch
+
+```bash
+git clone -b workshop/sf-tech-week https://github.com/CircleCI-Public/circleci-demo-javascript-react-app.git
+cd circleci-demo-javascript-react-app
+```
+
+Or fork on GitHub first, then clone **your** fork and check out `workshop/sf-tech-week`.
+
+### 2) Install app dependencies
+
+```bash
+yarn install
+```
+
+### 3) Install Chunk and initialize
+
+```bash
+brew install CircleCI-Public/circleci/chunk
+chunk init
+chunk auth set circleci
+# or: chunk auth login
+```
+
+`chunk init` writes `.chunk/config.json` (already committed here) and installs agent skills such as `/chunk-sidecar`.
+
+### 4) See the planted failure
+
+```bash
+yarn test
+```
+
+You should see `mergeEfficiencyPercent` fail: `3/4` should be `75`, but the helper is wrong on purpose.
+
+### 5) Fix it (agent or by hand)
+
+**Copy/paste agent prompt:**
 
 ```
+Fix the failing unit test for mergeEfficiencyPercent in src/factory/.
+It should return Math.round((merged / attempted) * 100) with no off-by-ten.
+Run `yarn test` to verify. Only edit files under src/factory/.
+Then run Chunk sidecar validation before declaring done.
+```
+
+Manual fix: edit `src/factory/metrics.js` and remove the `+ 10` from the return line.
+
+Confirm locally:
+
+```bash
+yarn test
+```
+
+### 6) Validate on a Chunk sidecar (inner loop)
+
+First time in this repo, ask your agent to run the **`chunk-sidecar`** / **`chunk-sidecar-setup`** skill, or:
+
+```bash
+chunk sidecar setup --dir .
+chunk sidecar sync
+chunk validate --remote
+```
+
+You want **green** sidecar output for `yarn test` (and `yarn build`) before you push.
+
+More detail: [chunk.ai](https://chunk.ai/) · [Introducing Chunk sidecars](https://circleci.com/blog/chunk-sidecars/)
+
+### 7) Push and watch CircleCI (outer loop)
+
+```bash
+git checkout -b fix/factory-mer
+git add src/factory
+git commit -m "fix: correct mergeEfficiencyPercent for workshop"
+git push -u origin HEAD
+```
+
+In CircleCI, follow the project (or your fork) and confirm the `build_and_test` workflow is green.
+
+---
+
+## What you just practiced
+
+| Station        | In this workshop                                      |
+| -------------- | ----------------------------------------------------- |
+| **Accuracy**   | Sidecar + CircleCI both run the same kind of checks   |
+| **Efficiency** | Fix while context is hot — no wait-for-push tax first |
+| **Risk**       | Cheap gates can auto; merge to main stays human       |
+
+---
+
+## Adopt Chunk
+
+1. Install: `brew install CircleCI-Public/circleci/chunk && chunk init`
+2. Site: [https://chunk.ai/](https://chunk.ai/)
+3. Blog: [Introducing Chunk sidecars](https://circleci.com/blog/chunk-sidecars/)
+4. Follow-along video (after the event): [YouTube demo](https://youtu.be/edyVGWvDQos)
+5. In your agent: run `/chunk-sidecar`
+
+---
+
+## If you get stuck
+
+| Symptom                         | Try this                                                                 |
+| ------------------------------- | ------------------------------------------------------------------------ |
+| `chunk: command not found`      | `brew install CircleCI-Public/circleci/chunk`                            |
+| Auth / org errors               | `chunk auth login` or `chunk auth set circleci` with a personal token    |
+| `yarn: command not found`       | Install Yarn 1.x, or use `corepack enable` then retry                    |
+| Sidecar create fails            | Confirm Free-plan CircleCI login; run `chunk auth status`                |
+| Tests fail after you “fixed” it | Re-read `AGENTS.md` — only edit `src/factory/`; do not delete tests      |
+| Build needs OpenSSL flag        | `yarn build` already sets `NODE_OPTIONS=--openssl-legacy-provider`       |
+
+---
+
+## Run the UI locally (optional)
+
+```bash
+yarn start
+```
+
+Open the Software Factory board: three cards for Accuracy, Efficiency, and Risk. The Efficiency card reads the same helper your tests cover.
+
+---
+
+## Appendix: CircleCI config (outer loop)
+
+Workshop CI stays simple: **test + build**. Deploy stays commented out.
+
+```yaml
 version: 2.1
 orbs:
   node: circleci/node@4.7.0
@@ -22,7 +155,7 @@ orbs:
 jobs:
   build_and_test:
     docker:
-      - image: cimg/node:17.2.0
+      - image: cimg/node:20.20.2
     steps:
       - checkout
       - node/install-packages:
@@ -33,55 +166,22 @@ jobs:
       - run:
           command: yarn build
           name: Build app
-      - persist_to_workspace:
-          root: ~/project
-          paths:
-            - .
-  deploy: # this can be any name you choose
-    docker:
-      - image: cimg/node:17.2.0
-    steps:
-      - attach_workspace:
-          at: ~/project
-      - heroku/deploy-via-git:
-          force: true # force push when pushing to the heroku remote, see: https://devcenter.heroku.com/articles/git
-
-workflows:
-  on_commit:
-    jobs:
-      - build_and_test
-      - deploy:
-          requires:
-            - build_and_test # only deploy if the build_and_test job has completed
-          filters:
-            branches:
-              only: master # only deploy when on main/master
-  nightly:
-    triggers:
-      - schedule:
-          cron: "0 0 * * *"       
-          filters:
-            branches:
-              only:
-                - master
-                - docs-node-js-language-guide
-    jobs:
-      - build_and_test
-      - deploy:
-          requires:
-            - build_and_test # only deploy if the build_and_test job has completed
-          filters:
-            branches:
-              only: master # only deploy when on main/master
 ```
 
-# Config Walkthrough
-By using the  [Node orb](https://circleci.com/orbs/registry/orb/circleci/node#jobs-test), it sets an executor from CircleCI's highly cached convenience images built for CI and allows you to set the version of NodeJS to use. Any available tag from this list can be used: https://hub.docker.com/r/cimg/node/tags.
- 
-The Node Orb test command will test your code with a one-line command, with optional parameters.
+Full file: [`.circleci/config.yml`](.circleci/config.yml)
 
-Matrix jobs are a simple way to test your Node app on various node environments. For a more in depth example of how the Node orb utilizes matrix jobs, see our blog on [matrix jobs](https://circleci.com/blog/circleci-matrix-jobs/). See [documentation on pipeline parameters](https://circleci.com/docs/2.0/pipeline-variables/#pipeline-parameters-in-configuration) to learn how to set a node version via Pipeline parameters.
+---
 
-Success! You just set up a Node.js app to build on CircleCI with version: 2.1 configuration. Check out our project’s Job page to see how this looks when building on CircleCI.
+## Project layout (workshop bits)
 
+| Path                         | Why it matters                                      |
+| ---------------------------- | --------------------------------------------------- |
+| `src/factory/metrics.js`     | Seeded bug lives here                               |
+| `src/factory/metrics.test.js`| The failing (then green) contract                   |
+| `AGENTS.md`                  | Agent prompt + sidecar loop                         |
+| `.chunk/config.json`         | Sidecar validate commands (`yarn test`, `yarn build`) |
+| `.agents/skills/`            | `chunk-sidecar` skills for agents                   |
 
+---
+
+MIT · Maintained for CircleCI public demos · Workshop branch for SF Tech Week 2026
