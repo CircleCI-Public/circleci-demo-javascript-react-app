@@ -43,4 +43,3 @@ In your agent, you can also run the `/chunk-sidecar` skill after `chunk init`.
 
 - Do not remove or weaken the tests to make them pass
 - Do not push until sidecar validation is green
-- Do not play the long YouTube demo during a live stage talk; link it after

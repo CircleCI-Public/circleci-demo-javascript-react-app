@@ -2,11 +2,9 @@
 
 **SF Tech Week hands-on** for [Fine Tuning Your (Software) Factory Settings](https://partiful.com/e/p7wbsI2PqLVgqkW9Qxsw).
 
-Goal: adopt **[Chunk sidecars](https://chunk.ai/)** so your agent gets CI-shaped feedback **before** you push — then let **CircleCI** own the outer-loop final exam.
+Goal: adopt **[Chunk sidecars](https://chunk.ai/)** so your agent gets CI-shaped feedback **before** you push, then let **CircleCI** own the outer-loop final exam.
 
 This branch (`workshop/sf-tech-week`) turns the public React demo into a tiny **Software Factory** board (Accuracy · Efficiency · Risk) with one intentional failing test so you can practice the sidecar loop end-to-end.
-
-> Prefer watching once before the room? Here is a longer walkthrough for later (not for playing on stage): [Chunk sidecars demo (YouTube)](https://youtu.be/edyVGWvDQos).
 
 ---
 
@@ -104,7 +102,7 @@ In CircleCI, follow the project (or your fork) and confirm the `build_and_test` 
 | Station        | In this workshop                                      |
 | -------------- | ----------------------------------------------------- |
 | **Accuracy**   | Sidecar + CircleCI both run the same kind of checks   |
-| **Efficiency** | Fix while context is hot — no wait-for-push tax first |
+| **Efficiency** | Fix while context is hot, with no wait-for-push tax   |
 | **Risk**       | Cheap gates can auto; merge to main stays human       |
 
 ---
@@ -114,7 +112,7 @@ In CircleCI, follow the project (or your fork) and confirm the `build_and_test` 
 1. Install: `brew install CircleCI-Public/circleci/chunk && chunk init`
 2. Site: [https://chunk.ai/](https://chunk.ai/)
 3. Blog: [Introducing Chunk sidecars](https://circleci.com/blog/chunk-sidecars/)
-4. Follow-along video (after the event): [YouTube demo](https://youtu.be/edyVGWvDQos)
+4. Deeper walkthrough (optional): [Chunk sidecars demo on YouTube](https://youtu.be/edyVGWvDQos)
 5. In your agent: run `/chunk-sidecar`
 
 ---
@@ -127,7 +125,7 @@ In CircleCI, follow the project (or your fork) and confirm the `build_and_test` 
 | Auth / org errors               | `chunk auth login` or `chunk auth set circleci` with a personal token    |
 | `yarn: command not found`       | Install Yarn 1.x, or use `corepack enable` then retry                    |
 | Sidecar create fails            | Confirm Free-plan CircleCI login; run `chunk auth status`                |
-| Tests fail after you “fixed” it | Re-read `AGENTS.md` — only edit `src/factory/`; do not delete tests      |
+| Tests fail after you “fixed” it | Re-read `AGENTS.md`: only edit `src/factory/`; do not delete tests      |
 | Build needs OpenSSL flag        | `yarn build` already sets `NODE_OPTIONS=--openssl-legacy-provider`       |
 
 ---
