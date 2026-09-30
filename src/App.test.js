@@ -6,7 +6,7 @@ import { create } from "react-test-renderer";
 // test card state renders
 
 // add error 
-//throw new Error('intentional failure for demo');
+throw new Error('intentional failure for demo');
 
 it('renders without crashing', () => {
   const div = document.createElement('div');
