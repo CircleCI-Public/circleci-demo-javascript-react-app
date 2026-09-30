@@ -1,19 +1,34 @@
 {
   "commands": [
     {
-      "name": "install",
-      "run": "npm ci"
-    },
-    {
       "name": "test",
-      "run": "yarn test",
+      "run": "ensure-deps && yarn test",
       "role": "gate",
-      "timeout": 300
+      "timeout": 300,
+      "remote": true
     }
   ],
   "vcs": {
     "org": "CircleCI-Public",
     "repo": "circleci-demo-javascript-react-app"
   },
-  "orgID": "2dd63740-c14b-4a21-b7f7-e206add7a4d7"
+  "validation": {
+    "sidecarImage": "97faca30-a727-4412-a656-0068d48f4a1d"
+  },
+  "orgID": "2dd63740-c14b-4a21-b7f7-e206add7a4d7",
+  "environment": {
+    "stack": "javascript",
+    "setup": [
+      {
+        "name": "system",
+        "command": "curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - && sudo apt-get install -y nodejs --no-install-recommends && sudo rm -rf /var/lib/apt/lists/*"
+      },
+      {
+        "name": "install",
+        "command": "npm install"
+      }
+    ],
+    "image": "cimg/node",
+    "image_version": "20.20.2"
+  }
 }
