@@ -2,7 +2,7 @@
   "commands": [
     {
       "name": "test",
-      "run": "ensure-deps && yarn test",
+      "run": "test -f yarn.lock || { echo 'ERROR: yarn.lock missing - this repo is yarn-only; refusing to run the gate'; exit 1; }; test ! -f package-lock.json || { echo 'ERROR: package-lock.json present - npm detour detected; delete it and reinstall with yarn'; exit 1; }; ensure-deps && yarn test",
       "role": "gate",
       "timeout": 300,
       "remote": true
@@ -13,7 +13,7 @@
     "repo": "circleci-demo-javascript-react-app"
   },
   "validation": {
-    "sidecarImage": "bfc473e9-12d9-4bd8-b763-c3c3434fff62"
+    "sidecarImage": "demo-testsnap1"
   },
   "orgID": "2dd63740-c14b-4a21-b7f7-e206add7a4d7",
   "environment": {
@@ -25,7 +25,7 @@
       },
       {
         "name": "install",
-        "command": "npm install"
+        "command": "yarn install --frozen-lockfile"
       }
     ],
     "image": "cimg/node",
