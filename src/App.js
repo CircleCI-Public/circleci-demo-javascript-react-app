@@ -32,6 +32,7 @@ class App extends Component {
       { data: { id: '2', crosspost_parent: null, media: null, url: '/hippos/hippo2.png' } },
       { data: { id: '3', crosspost_parent: null, media: null, url: '/hippos/hippo3.png' } },
       { data: { id: '4', crosspost_parent: null, media: null, url: '/hippos/hippo4.png' } },
+      { data: { id: '5', crosspost_parent: null, media: null, url: '/hippos/hippo5.png' } },
 
     ];
     this.setState({ cards: mockHippos });
