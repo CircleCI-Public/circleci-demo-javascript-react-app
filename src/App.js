@@ -9,7 +9,6 @@ import Card from './Components/Card';
 
 class App extends Component {
 
-  
   render() {
     return (
       <Layout>

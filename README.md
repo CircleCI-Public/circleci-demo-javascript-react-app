@@ -1,3 +1,16 @@
+# SF Tech Week: Example Demo Project
+Goal: get people to become users of sidecars 
+
+Potential Demo Schedule:
+* Intro/Theory
+* Demo Project (this Baby Hippo Gram)
+* Testing/Questions
+
+Changes By Me:
+I added new images + planted some errors for us to validate using Clade Code + chunk validate. These errors include typos, build/syntax, and instant crashes. 
+
+Everything after this text in the README is from the previous repo that was used for marketing demos.
+
 # Quickstart: Demo JavaScript Node.js Reference Project
 We maintain a reference JavaScript Node.js project to show how to build an Express.js app on CircleCI with version: 2.1 configuration:
 [Demo JavaScript Node Project on GitHub](https://github.com/CircleCI-Public/circleci-demo-javascript-react-app)
