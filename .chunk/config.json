@@ -13,7 +13,7 @@
     "repo": "circleci-demo-javascript-react-app"
   },
   "validation": {
-    "sidecarImage": "97faca30-a727-4412-a656-0068d48f4a1d"
+    "sidecarImage": "bfc473e9-12d9-4bd8-b763-c3c3434fff62"
   },
   "orgID": "2dd63740-c14b-4a21-b7f7-e206add7a4d7",
   "environment": {
