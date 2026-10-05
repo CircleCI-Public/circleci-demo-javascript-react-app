@@ -1,8 +1,29 @@
 {
   "commands": [
     {
+      "name": "lint",
+      "run": "pnpm install --frozen-lockfile --prefer-offline && pnpm lint",
+      "role": "gate",
+      "timeout": 120,
+      "remote": true
+    },
+    {
+      "name": "format",
+      "run": "pnpm install --frozen-lockfile --prefer-offline && pnpm format:check",
+      "role": "gate",
+      "timeout": 120,
+      "remote": true
+    },
+    {
+      "name": "typecheck",
+      "run": "pnpm install --frozen-lockfile --prefer-offline && pnpm typecheck",
+      "role": "gate",
+      "timeout": 180,
+      "remote": true
+    },
+    {
       "name": "test",
-      "run": "ensure-deps && pnpm test",
+      "run": "pnpm install --frozen-lockfile --prefer-offline && pnpm test",
       "role": "gate",
       "timeout": 300,
       "remote": true

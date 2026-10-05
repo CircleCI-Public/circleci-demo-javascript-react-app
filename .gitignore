@@ -17,3 +17,6 @@
 
 npm-debug.log*
 pnpm-debug.log*
+
+# chunk runtime state
+/.chunk/validate-pool.json
