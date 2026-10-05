@@ -1,0 +1,59 @@
+{
+  "commands": [
+    {
+      "name": "lint",
+      "run": "pnpm install --frozen-lockfile --prefer-offline && pnpm lint",
+      "role": "gate",
+      "timeout": 120,
+      "remote": true
+    },
+    {
+      "name": "format",
+      "run": "pnpm install --frozen-lockfile --prefer-offline && pnpm format:check",
+      "role": "gate",
+      "timeout": 120,
+      "remote": true
+    },
+    {
+      "name": "typecheck",
+      "run": "pnpm install --frozen-lockfile --prefer-offline && pnpm typecheck",
+      "role": "gate",
+      "timeout": 180,
+      "remote": true
+    },
+    {
+      "name": "test",
+      "run": "pnpm install --frozen-lockfile --prefer-offline && pnpm test",
+      "role": "gate",
+      "timeout": 300,
+      "remote": true
+    }
+  ],
+  "vcs": {
+    "org": "CircleCI-Public",
+    "repo": "circleci-demo-javascript-react-app"
+  },
+  "validation": {
+    "sidecarImage": "react-app-pnpm-node22-claude"
+  },
+  "orgID": "2dd63740-c14b-4a21-b7f7-e206add7a4d7",
+  "environment": {
+    "stack": "javascript",
+    "setup": [
+      {
+        "name": "system",
+        "command": "curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - && sudo apt-get install -y nodejs --no-install-recommends && sudo rm -rf /var/lib/apt/lists/*"
+      },
+      {
+        "name": "install",
+        "command": "corepack enable && pnpm install --frozen-lockfile"
+      },
+      {
+        "name": "claude-code",
+        "command": "curl -fsSL https://claude.ai/install.sh | bash && sudo ln -sf \"$HOME/.local/bin/claude\" /usr/local/bin/claude"
+      }
+    ],
+    "image": "cimg/node",
+    "image_version": "22.12"
+  }
+}
