@@ -1,64 +1,74 @@
 version: 2.1
 orbs:
-  node: circleci/node@4.7.0
-  heroku: circleci/heroku@1.2.6
+  node: circleci/node@7.2.1
 
 jobs:
   build_and_test:
     docker:
-      - image: cimg/node:20.20.2
+      - image: cimg/node:24.21.0
     steps:
       - checkout
+      - node/install-pnpm:
+          version: 12.9.1
       - node/install-packages:
-          pkg-manager: yarn
+          pkg-manager: pnpm
       - run:
-          command: yarn test
+          command: pnpm lint
+          name: Lint
+      - run:
+          command: pnpm format:check
+          name: Check formatting
+      - run:
+          command: pnpm test
           name: Run tests
+      - store_test_results:
+          path: test-results
       - run:
-          command: yarn build
+          command: pnpm build
           name: Build app
       - persist_to_workspace:
           root: ~/project
           paths:
-            - .
+            - build
   deploy: # this can be any name you choose
     docker:
-      - image: cimg/node:20.20.2
+      - image: cimg/node:24.21.0
     steps:
       - attach_workspace:
           at: ~/project
-      - heroku/deploy-via-git: 
-          force: true # force push when pushing to the heroku remote, see: https://devcenter.heroku.com/articles/git
+      - run:
+          # Package the tested build in Vercel's Build Output API format so Vercel deploys it as-is
+          # instead of rebuilding: https://vercel.com/docs/build-output-api
+          name: Prepare Vercel output
+          command: |
+            mkdir -p .vercel/output
+            cp -r build .vercel/output/static
+            echo '{"version": 3}' > .vercel/output/config.json
+      - run:
+          # Requires VERCEL_TOKEN, VERCEL_ORG_ID and VERCEL_PROJECT_ID environment variables
+          name: Deploy to Vercel
+          command: npx --yes vercel@62.2.0 deploy --prebuilt --prod --token "$VERCEL_TOKEN"
 
 workflows:
   on_commit:
     jobs:
       - build_and_test
-      # Follow instructions here to authenticate git for Heroku: https://devcenter.heroku.com/articles/git#http-git-authentication
-      # The following code may be uncommented, onnce HEROKU_API_KEY & HEROKU_APP_NAME environemnt variables are present
-      # Read more: https://circleci.com/docs/2.0/env-vars/
+      # To deploy to Vercel, create a Vercel token and project, then set VERCEL_TOKEN, VERCEL_ORG_ID
+      # and VERCEL_PROJECT_ID as environment variables and uncomment the job below.
+      # Read more: https://circleci.com/docs/guides/security/env-vars/
       # - deploy:
       #     requires:
       #       - build_and_test # only deploy if the build_and_test job has completed
       #     filters:
       #       branches:
-      #         only: master # only deploy when on main/master
+      #         only: main # only deploy when on main
   nightly:
     triggers:
       - schedule:
-          cron: "0 0 * * *"       
+          cron: '0 0 * * *'
           filters:
             branches:
               only:
-                - master
+                - main
     jobs:
       - build_and_test
-      # Follow instructions here to authenticate git for Heroku: https://devcenter.heroku.com/articles/git#http-git-authentication
-      # The following code may be uncommented, onnce HEROKU_API_KEY & HEROKU_APP_NAME environemnt variables are present
-      # Read more: https://circleci.com/docs/2.0/env-vars/
-      # - deploy:
-      #     requires:
-      #       - build_and_test # only deploy if the build_and_test job has completed
-      #     filters:
-      #       branches:
-      #         only: master # only deploy when on main/master

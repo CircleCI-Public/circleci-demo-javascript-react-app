@@ -1,87 +1,123 @@
-# Quickstart: Demo JavaScript Node.js Reference Project
-We maintain a reference JavaScript Node.js project to show how to build an Express.js app on CircleCI with version: 2.1 configuration:
-[Demo JavaScript Node Project on GitHub](https://github.com/CircleCI-Public/circleci-demo-javascript-react-app)
-[Demo JavaScript Node Project building on CircleCI](https://app.circleci.com/pipelines/github/CircleCI-Public/circleci-demo-javascript-react-app)
+# CircleCI Demo: React + TypeScript App
 
-In the project you will find a CircleCI configuration file .circleci/config.yml. This file shows best practice for using version 2.1 config with Node projects.
-Build the Demo JavaScript Node Project Yourself
-A good way to start using CircleCI is to build a project yourself. Here’s how to build the demo project with your own account:
-Fork the project on GitHub to your own account.
-Go to the Add Projects page in the CircleCI application and click the Set Up Project button next to the project you just forked.
-To make changes you can edit the .circleci/config.yml file and make a commit. When you push a commit to GitHub, CircleCI will build and test the project.
+A small reference project showing how to build and test a React front end on CircleCI with version 2.1 configuration.
 
-# Sample Configuration
-Below is the .circleci/config.yml file in the demo project.
+- [Project on GitHub](https://github.com/CircleCI-Public/circleci-demo-javascript-react-app)
+- [Project building on CircleCI](https://app.circleci.com/pipelines/github/CircleCI-Public/circleci-demo-javascript-react-app)
+
+The app, **Baby Hippo Gram**, is a gallery of baby hippo photos. It's built with React 19, TypeScript, Vite and Tailwind CSS, and tested with Vitest and React Testing Library. The photos are bundled with the app (see [`public/images/CREDITS.md`](public/images/CREDITS.md) for attribution), so it needs no network access or API keys to build, test or run.
+
+## Run it locally
+
+You need Node.js 22.12 or newer and [pnpm](https://pnpm.io/installation). The pnpm version is pinned in `package.json`'s `packageManager` field, and pnpm switches to it automatically.
 
 ```
+pnpm install
+pnpm start        # dev server at http://localhost:3000
+```
+
+Other scripts:
+
+| Command          | What it does                                                                      |
+| ---------------- | --------------------------------------------------------------------------------- |
+| `pnpm test`      | Runs the tests once, with coverage and a JUnit report in `test-results/junit.xml` |
+| `pnpm lint`      | Lints with oxlint; warnings fail the run                                          |
+| `pnpm format`    | Formats files in place with oxfmt                                                 |
+| `pnpm typecheck` | Type-checks the project with `tsc`                                                |
+| `pnpm build`     | Type-checks, then builds the production bundle into `build/`                      |
+| `pnpm preview`   | Serves the production build locally                                               |
+
+## Build it on CircleCI yourself
+
+1. Fork the project on GitHub to your own account.
+2. In the CircleCI app, go to **Projects**, find your fork and click **Set Up Project**.
+3. Make a change and push a commit. CircleCI runs the pipeline defined in `.circleci/config.yml`.
+
+## Sample configuration
+
+This is the `.circleci/config.yml` file in the project.
+
+```yaml
 version: 2.1
 orbs:
-  node: circleci/node@4.7.0
-  heroku: circleci/heroku@1.2.6
+  node: circleci/node@7.2.1
 
 jobs:
   build_and_test:
     docker:
-      - image: cimg/node:17.2.0
+      - image: cimg/node:24.21.0
     steps:
       - checkout
+      - node/install-pnpm:
+          version: 12.9.1
       - node/install-packages:
-          pkg-manager: yarn
+          pkg-manager: pnpm
       - run:
-          command: yarn test
+          command: pnpm lint
+          name: Lint
+      - run:
+          command: pnpm format:check
+          name: Check formatting
+      - run:
+          command: pnpm test
           name: Run tests
+      - store_test_results:
+          path: test-results
       - run:
-          command: yarn build
+          command: pnpm build
           name: Build app
       - persist_to_workspace:
           root: ~/project
           paths:
-            - .
+            - build
   deploy: # this can be any name you choose
     docker:
-      - image: cimg/node:17.2.0
+      - image: cimg/node:24.21.0
     steps:
       - attach_workspace:
           at: ~/project
-      - heroku/deploy-via-git:
-          force: true # force push when pushing to the heroku remote, see: https://devcenter.heroku.com/articles/git
+      - run:
+          # Package the tested build in Vercel's Build Output API format so Vercel deploys it as-is
+          # instead of rebuilding: https://vercel.com/docs/build-output-api
+          name: Prepare Vercel output
+          command: |
+            mkdir -p .vercel/output
+            cp -r build .vercel/output/static
+            echo '{"version": 3}' > .vercel/output/config.json
+      - run:
+          # Requires VERCEL_TOKEN, VERCEL_ORG_ID and VERCEL_PROJECT_ID environment variables
+          name: Deploy to Vercel
+          command: npx --yes vercel@62.2.0 deploy --prebuilt --prod --token "$VERCEL_TOKEN"
 
 workflows:
   on_commit:
     jobs:
       - build_and_test
-      - deploy:
-          requires:
-            - build_and_test # only deploy if the build_and_test job has completed
-          filters:
-            branches:
-              only: master # only deploy when on main/master
+      # To deploy to Vercel, create a Vercel token and project, then set VERCEL_TOKEN, VERCEL_ORG_ID
+      # and VERCEL_PROJECT_ID as environment variables and uncomment the job below.
+      # Read more: https://circleci.com/docs/guides/security/env-vars/
+      # - deploy:
+      #     requires:
+      #       - build_and_test # only deploy if the build_and_test job has completed
+      #     filters:
+      #       branches:
+      #         only: main # only deploy when on main
   nightly:
     triggers:
       - schedule:
-          cron: "0 0 * * *"       
+          cron: '0 0 * * *'
           filters:
             branches:
               only:
-                - master
-                - docs-node-js-language-guide
+                - main
     jobs:
       - build_and_test
-      - deploy:
-          requires:
-            - build_and_test # only deploy if the build_and_test job has completed
-          filters:
-            branches:
-              only: master # only deploy when on main/master
 ```
 
-# Config Walkthrough
-By using the  [Node orb](https://circleci.com/orbs/registry/orb/circleci/node#jobs-test), it sets an executor from CircleCI's highly cached convenience images built for CI and allows you to set the version of NodeJS to use. Any available tag from this list can be used: https://hub.docker.com/r/cimg/node/tags.
- 
-The Node Orb test command will test your code with a one-line command, with optional parameters.
+## Config walkthrough
 
-Matrix jobs are a simple way to test your Node app on various node environments. For a more in depth example of how the Node orb utilizes matrix jobs, see our blog on [matrix jobs](https://circleci.com/blog/circleci-matrix-jobs/). See [documentation on pipeline parameters](https://circleci.com/docs/2.0/pipeline-variables/#pipeline-parameters-in-configuration) to learn how to set a node version via Pipeline parameters.
-
-Success! You just set up a Node.js app to build on CircleCI with version: 2.1 configuration. Check out our project’s Job page to see how this looks when building on CircleCI.
-
-
+- **Orbs.** The [Node orb](https://circleci.com/developer/orbs/orb/circleci/node) installs dependencies with `node/install-packages`, caching them between runs based on `pnpm-lock.yaml`. Because the CircleCI images don't include pnpm, `node/install-pnpm` installs the pinned version first.
+- **Executor.** Jobs run in `cimg/node`, a CircleCI convenience image. Any tag from [Docker Hub](https://hub.docker.com/r/cimg/node/tags) can be used to pick a Node version.
+- **`build_and_test` job.** Installs dependencies, lints with [oxlint](https://oxc.rs/docs/guide/usage/linter), checks formatting with [oxfmt](https://oxc.rs/docs/guide/usage/formatter), runs the tests, uploads the JUnit results with `store_test_results` so they show up in the CircleCI test view, then type-checks and builds the app. The `build/` folder is saved to the workspace so the `deploy` job can ship exactly what was tested.
+- **`deploy` job.** Packages `build/` in Vercel's [Build Output API](https://vercel.com/docs/build-output-api) format and deploys it with [`vercel deploy --prebuilt --prod`](https://vercel.com/docs/cli/deploy), so Vercel serves the tested files rather than rebuilding them.
+- **Workflows.** `on_commit` runs on every push. `nightly` runs `build_and_test` every day at midnight UTC on `main`. The `deploy` step in `on_commit` is commented out. To turn it on, create a Vercel project and a [Vercel access token](https://vercel.com/kb/guide/how-do-i-use-a-vercel-api-access-token), then set `VERCEL_TOKEN`, `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` as [environment variables](https://circleci.com/docs/guides/security/env-vars/). The org and project IDs are in `.vercel/project.json` after you run `vercel link` locally.
