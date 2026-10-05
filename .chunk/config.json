@@ -34,7 +34,7 @@
     "repo": "circleci-demo-javascript-react-app"
   },
   "validation": {
-    "sidecarImage": "react-app-pnpm-node22-v2"
+    "sidecarImage": "react-app-pnpm-node22-claude"
   },
   "orgID": "2dd63740-c14b-4a21-b7f7-e206add7a4d7",
   "environment": {
@@ -47,6 +47,10 @@
       {
         "name": "install",
         "command": "corepack enable && pnpm install --frozen-lockfile"
+      },
+      {
+        "name": "claude-code",
+        "command": "curl -fsSL https://claude.ai/install.sh | bash && sudo ln -sf \"$HOME/.local/bin/claude\" /usr/local/bin/claude"
       }
     ],
     "image": "cimg/node",
