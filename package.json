@@ -1,44 +1,40 @@
 {
-  "name": "circleci-demo-javascript-create-react-app",
+  "name": "circleci-demo-javascript-react-app",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "react-scripts": "^5.0.0"
-  },
+  "type": "module",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "export NODE_OPTIONS=--openssl-legacy-provider; react-scripts build",
-    "test": "react-scripts test --watchAll=false --maxWorkers=2 --ci --coverage --reporters=default --reporters=jest-junit",
-    "eject": "react-scripts eject"
+    "start": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc",
+    "test": "vitest run --coverage",
+    "lint": "oxlint --deny-warnings",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check"
   },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "dependencies": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
   },
   "devDependencies": {
-    "jest-junit": "^10.0.0",
-    "react-test-renderer": "^16.13.1"
+    "@tailwindcss/vite": "^4.3.3",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "@vitest/coverage-v8": "^5.0.3",
+    "jsdom": "^30.1.2",
+    "oxfmt": "^0.71.0",
+    "oxlint": "^1.86.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.2",
+    "vitest": "^5.0.3"
   },
-  "jest-junit": {
-    "suiteName": "jest tests",
-    "outputDirectory": ".",
-    "outputName": "test-results/junit.xml",
-    "classNameTemplate": "{classname}-{title}",
-    "titleTemplate": "{classname}-{title}",
-    "ancestorSeparator": " › ",
-    "usePathForSuiteName": "true"
-  }
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "packageManager": "pnpm@12.9.1"
 }

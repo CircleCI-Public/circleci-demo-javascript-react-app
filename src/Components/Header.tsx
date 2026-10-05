@@ -1,22 +1,12 @@
-import React from 'react';
-
-export default class Header extends React.Component {
-    render() {
-      return (
-        <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-          <a class="navbar-brand" href="/#">{ this.props.title }</a>
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-  
-          <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-            <ul class="navbar-nav mr-auto">
-              <li class="nav-item active">
-                <a class="nav-link" href="/#">Home <span class="sr-only">(current)</span></a>
-              </li>
-            </ul>
-          </div>
-        </nav>
-      );
-    }
-  }
+export default function Header({ title }: { title: string }) {
+  return (
+    <nav className="fixed inset-x-0 top-0 z-10 flex h-14 items-center gap-6 bg-zinc-800 px-4 text-white">
+      <a className="text-xl" href="/#">
+        {title}
+      </a>
+      <a className="text-white/80 hover:text-white" href="/#" aria-current="page">
+        Home
+      </a>
+    </nav>
+  );
+}

@@ -1,12 +1,5 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 
-export default class Layout extends React.Component {
-    render() {
-
-      return ( 
-        <div>
-          { this.props.children }
-        </div>
-      );
-    }
-  }
+export default function Layout({ children }: { children: ReactNode }) {
+  return <div>{children}</div>;
+}
