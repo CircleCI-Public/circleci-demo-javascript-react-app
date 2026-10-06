@@ -2,6 +2,10 @@
 # Runs once when the dev container is created: app dependencies, then the tools for the chunk demo.
 set -euo pipefail
 
+# Trust this container's mounted workspace without changing the host's Git config.
+WORKSPACE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+git config --global --add safe.directory "$WORKSPACE"
+
 # Same install step the chunk sidecar uses (see .chunk/config.json)
 sudo corepack enable
 pnpm install --frozen-lockfile
