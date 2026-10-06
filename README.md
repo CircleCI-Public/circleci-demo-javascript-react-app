@@ -27,6 +27,12 @@ Other scripts:
 | `pnpm build`     | Type-checks, then builds the production bundle into `build/`                      |
 | `pnpm preview`   | Serves the production build locally                                               |
 
+## Run it in a dev container
+
+If you'd rather not install Node and pnpm yourself, open the project in a [dev container](https://containers.dev) (VS Code with the Dev Containers extension, or GitHub Codespaces). The first start installs the dependencies, the [Chunk CLI](https://github.com/CircleCI-Public/chunk-cli) and Claude Code, and port 3000 is forwarded for `pnpm start`.
+
+To use Chunk from inside the container, set `CIRCLE_TOKEN` (and `GITHUB_TOKEN` if you want `gh`) on your machine before opening it, or run `chunk auth login`. Claude Code asks you to sign in the first time you run `claude`.
+
 ## Build it on CircleCI yourself
 
 1. Fork the project on GitHub to your own account.
