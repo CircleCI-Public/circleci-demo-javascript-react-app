@@ -7,6 +7,10 @@ A small reference project showing how to build and test a React front end on Cir
 
 The app, **Baby Hippo Gram**, is a gallery of baby hippo photos. It's built with React 19, TypeScript, Vite and Tailwind CSS, and tested with Vitest and React Testing Library. The photos are bundled with the app (see [`public/images/CREDITS.md`](public/images/CREDITS.md) for attribution), so it needs no network access or API keys to build, test or run.
 
+## About
+
+Baby Hippo Gram shows a grid of baby hippo photos, each credited to its photographer and license. Click a photo to like it, and a heart appears under it. Click it again to remove the like. Likes are kept only in memory, so they reset when you reload the page. The **About** link in the nav bar shows a short note on why the app exists: it's a demo of how [CircleCI Chunk](https://github.com/CircleCI-Public/chunk-cli) sidecars catch mistakes in AI-generated code while you're still working on it, before the code reaches CI.
+
 ## Run it locally
 
 You need Node.js 22.12 or newer and [pnpm](https://pnpm.io/installation). The pnpm version is pinned in `package.json`'s `packageManager` field, and pnpm switches to it automatically.
